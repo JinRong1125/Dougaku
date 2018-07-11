@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="myPlaylistDetailModel"
+            type="shinei.com.dougaku.viewModel.MyPlaylistDetailModel" />
+        <variable
+            name="sharedViewModel"
+            type="shinei.com.dougaku.viewModel.SharedViewModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/drawable_background">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:enabled="false"
+            app:refreshing="@{myPlaylistDetailModel.refreshing}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <android.support.design.widget.CoordinatorLayout
+                android:id="@+id/coordinator_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.design.widget.AppBarLayout
+                    android:id="@+id/app_bar_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    app:layout_behavior="shinei.com.dougaku.helper.FixAppBarLayoutBehavior"
+                    app:elevation="0dp">
+
+                    <include
+                        layout="@layout/layout_display_my_playlist_detail"
+                        android:id="@+id/my_playlist_detail_display_layout"
+                        bind:myPlaylistDetailModel="@{myPlaylistDetailModel}" />
+
+                </android.support.design.widget.AppBarLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/playlist_tracks_recycler_view"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+
+                    <ImageView
+                        android:id="@+id/empty_image_view"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/icon_big"
+                        android:visibility="@{myPlaylistDetailModel.emptyImageVisibility}" />
+
+                </FrameLayout>
+
+            </android.support.design.widget.CoordinatorLayout>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <include
+            layout="@layout/layout_toolbar_my_playlist_detail"
+            android:id="@+id/my_playlist_detail_toolbar_layout"
+            bind:myPlaylistDetailModel="@{myPlaylistDetailModel}"
+            bind:sharedViewModel="@{sharedViewModel}" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

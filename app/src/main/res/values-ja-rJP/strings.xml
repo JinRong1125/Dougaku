@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dougaku</string>
+
+    <string name="song">楽曲</string>
+    <string name="album">アルバム</string>
+    <string name="producer">プロデューサー</string>
+    <string name="artist">アーティスト</string>
+    <string name="genre">ジャンル</string>
+    <string name="event">イベント</string>
+    <string name="myself">私</string>
+
+    <string name="liked_tracks">お気に入り楽曲</string>
+    <string name="liked_albums">お気に入りアルバム</string>
+    <string name="playlists">プレイリスト</string>
+    <string name="listening_history">再生履歴</string>
+
+    <string name="menu_like_track">お気に入り楽曲に追加</string>
+    <string name="menu_unlike_track">お気に入り楽曲から削除</string>
+    <string name="menu_like_album">お気に入りアルバムに追加</string>
+    <string name="menu_unlike_album">お気に入りアルバムから削除</string>
+    <string name="menu_add_to_playlist">プレイリストに追加</string>
+    <string name="menu_remove_from_playlist">プレイリストから削除</string>
+    <string name="menu_remove_playlist">プレイリストを削除</string>
+    <string name="menu_clear_listening_history">再生履歴を全て削除</string>
+    <string name="option_create_new_playlist">プレイリストを作成</string>
+    <string name="hint_enter_playlist_title">プレイリストのタイトルを入力</string>
+
+    <string name="hint_search">&#160;検索</string>
+
+    <string name="cancel">キャンセル</string>
+    <string name="done">完成</string>
+
+    <string name="albums">&#160;アルバム</string>
+    <string name="songs">&#160;曲</string>
+
+    <string name="toast_add_to_liked_tracks">お気に入り楽曲に追加しました</string>
+    <string name="toast_remove_from_liked_tracks">お気に入り楽曲から削除しました</string>
+    <string name="toast_add_to_liked_albums">お気に入りアルバムに追加しました</string>
+    <string name="toast_remove_from_liked_albums">お気に入りアルバムから削除しました</string>
+    <string name="toast_add_to_playlist">プレイリストに追加しました</string>
+    <string name="toast_remove_from_playlist">プレイリストから削除しました</string>
+    <string name="toast_playlist_title_invalid">有効なタイトルを入力してください</string>
+    <string name="toast_remove_playlist">プレイリストを削除しました</string>
+    <string name="toast_clear_listening_history">再生履歴を全て削除しました</string>
+
+    <string name="toast_operation_failed">操作は失敗しました</string>
+    <string name="toast_connect_failed">サーバーに接続できません</string>
+</resources>

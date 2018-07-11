@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="shinei.com.dougaku">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/icon_app"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:name=".App">
+        <activity android:name=".view.activity.MainActivity"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".service.PlayerService">
+            <intent-filter>
+                <action android:name="shinei.com.dougaku.action.PREPARE_TRACK"/>
+                <action android:name="shinei.com.dougaku.action.PLAY_PAUSE"/>
+                <action android:name="shinei.com.dougaku.action.PLAY"/>
+                <action android:name="shinei.com.dougaku.action.PAUSE"/>
+                <action android:name="shinei.com.dougaku.action.STOP"/>
+                <action android:name="shinei.com.dougaku.action.SEEK"/>
+                <action android:name="shinei.com.dougaku.action.PREPARE_PAUSE"/>
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>

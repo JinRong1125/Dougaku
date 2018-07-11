@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="albumDetailModel"
+            type="shinei.com.dougaku.viewModel.AlbumDetailModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/album_detail_display_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="60dp"
+        android:alpha="@{albumDetailModel.displayAlpha}">
+
+        <ImageView
+            android:id="@+id/album_image_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:loadImage="@{albumDetailModel.albumLiveData.coverUrl}"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@drawable/drawable_toolbar_track"/>
+
+        <android.support.constraint.ConstraintLayout
+            android:id="@+id/shadow_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/drawable_album_track"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/album_image_view">
+
+            <TextView
+                android:id="@+id/title_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="40dp"
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:textSize="25sp"
+                android:text="@{albumDetailModel.albumLiveData.title}"
+                app:layout_constraintStart_toStartOf="@+id/producer_text_view"
+                app:layout_constraintEnd_toEndOf="@+id/producer_text_view"
+                app:layout_constraintBottom_toTopOf="@+id/producer_text_view" />
+
+            <TextView
+                android:id="@+id/producer_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="10dp"
+                android:singleLine="true"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:text="@{albumDetailModel.albumLiveData.producer}"
+                app:layout_constraintStart_toStartOf="@+id/shadow_layout"
+                app:layout_constraintEnd_toEndOf="@+id/shadow_layout"
+                app:layout_constraintBottom_toBottomOf="@+id/shadow_layout" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#003200</color>
+    <color name="colorPrimaryDark">#003200</color>
+    <color name="colorAccent">#003200</color>
+
+    <color name="green_light">#00CC00</color>
+    <color name="green_half">#006400</color>
+    <color name="green_dark">#003200</color>
+    <color name="gray_light">#DFDFDF</color>
+    <color name="gray">#BFBFBF</color>
+
+    <color name="alpha_25">#40000000</color>
+    <color name="alpha_30">#4D000000</color>
+    <color name="alpha_40">#66000000</color>
+    <color name="alpha_50">#80000000</color>
+    <color name="alpha_60">#99000000</color>
+    <color name="alpha_75">#BF000000</color>
+    <color name="alpha_80">#CC000000</color>
+    <color name="alpha_90">#E6000000</color>
+</resources>

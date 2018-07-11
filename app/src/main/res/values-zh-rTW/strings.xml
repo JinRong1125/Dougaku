@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dougaku</string>
+
+    <string name="song">歌曲</string>
+    <string name="album">專輯</string>
+    <string name="producer">發行者</string>
+    <string name="artist">藝術家</string>
+    <string name="genre">類型</string>
+    <string name="event">活動</string>
+    <string name="myself">我的</string>
+
+    <string name="liked_tracks">喜愛歌曲</string>
+    <string name="liked_albums">喜愛專輯</string>
+    <string name="playlists">播放歌單</string>
+    <string name="listening_history">播放紀錄</string>
+
+    <string name="menu_like_track">加入喜愛歌曲</string>
+    <string name="menu_unlike_track">取消喜愛歌曲</string>
+    <string name="menu_like_album">加入喜愛專輯</string>
+    <string name="menu_unlike_album">取消喜愛專輯</string>
+    <string name="menu_add_to_playlist">加入播放歌單</string>
+    <string name="menu_remove_from_playlist">從播放歌單刪除</string>
+    <string name="menu_remove_playlist">刪除播放歌單</string>
+    <string name="menu_clear_listening_history">刪除所有播放紀錄</string>
+    <string name="option_create_new_playlist">加入新的播放歌單</string>
+    <string name="hint_enter_playlist_title">輸入播放歌單的名稱</string>
+
+    <string name="hint_search">&#160;搜尋</string>
+
+    <string name="cancel">取消</string>
+    <string name="done">完成</string>
+
+    <string name="albums">&#160;張專輯</string>
+    <string name="songs">&#160;首歌曲</string>
+
+    <string name="toast_add_to_liked_tracks">已加入喜愛歌曲</string>
+    <string name="toast_remove_from_liked_tracks">已取消喜愛歌曲</string>
+    <string name="toast_add_to_liked_albums">已加入喜愛專輯</string>
+    <string name="toast_remove_from_liked_albums">已取消喜愛專輯</string>
+    <string name="toast_add_to_playlist">已加入播放歌單</string>
+    <string name="toast_remove_from_playlist">已從播放歌單刪除</string>
+    <string name="toast_playlist_title_invalid">請輸入有效的名稱</string>
+    <string name="toast_remove_playlist">已刪除播放歌單</string>
+    <string name="toast_clear_listening_history">已刪除所有播放紀錄</string>
+
+    <string name="toast_operation_failed">操作失敗</string>
+    <string name="toast_connect_failed">無法連線</string>
+</resources>

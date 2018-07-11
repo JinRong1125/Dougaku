@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="albumDetailModel"
+            type="shinei.com.dougaku.viewModel.AlbumDetailModel" />
+        <variable
+            name="sharedViewModel"
+            type="shinei.com.dougaku.viewModel.SharedViewModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/drawable_background">
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_layout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:enabled="@{!albumDetailModel.loadCompleted}"
+            app:refreshing="@{albumDetailModel.refreshing}"
+            app:onRefreshListener="@{() -> albumDetailModel.loadAlbumSongs(albumDetailModel.albumLiveData)}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <android.support.design.widget.CoordinatorLayout
+                android:id="@+id/coordinator_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.design.widget.AppBarLayout
+                    android:id="@+id/app_bar_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    app:layout_behavior="shinei.com.dougaku.helper.FixAppBarLayoutBehavior"
+                    app:elevation="0dp">
+
+                    <include
+                        layout="@layout/layout_display_album_detail"
+                        android:id="@+id/album_detail_display_layout"
+                        bind:albumDetailModel="@{albumDetailModel}" />
+
+                </android.support.design.widget.AppBarLayout>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/track_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+            </android.support.design.widget.CoordinatorLayout>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <include
+            layout="@layout/layout_toolbar_album_detail"
+            android:id="@+id/track_toolbar_layout"
+            bind:albumDetailModel="@{albumDetailModel}"
+            bind:sharedViewModel="@{sharedViewModel}" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

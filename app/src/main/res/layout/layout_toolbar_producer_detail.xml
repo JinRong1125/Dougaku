@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="producerDetailModel"
+            type="shinei.com.dougaku.viewModel.ProducerDetailModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/producer_detail_toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/back_image_button"
+            android:background="@drawable/icon_back"
+            android:onClick="@{(v) -> producerDetailModel.onBackPressed(v)}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/image_button" />
+
+        <TextView
+            android:id="@+id/name_text_view"
+            android:alpha="@{producerDetailModel.toolbarNameAlpha}"
+            android:visibility="@{producerDetailModel.toolbarNameVisibility}"
+            android:text="@{producerDetailModel.producerLiveData.name}"
+            app:layout_constraintStart_toEndOf="@+id/back_image_button"
+            app:layout_constraintEnd_toStartOf="@+id/option_image_button"
+            app:layout_constraintTop_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="parent"
+            style="@style/toolbar_title" />
+
+        <ImageButton
+            android:id="@+id/option_image_button"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/image_button" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

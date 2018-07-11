@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="playerViewModel"
+            type="shinei.com.dougaku.viewModel.PlayerViewModel" />
+        <variable
+            name="sharedViewModel"
+            type="shinei.com.dougaku.viewModel.SharedViewModel" />
+        <variable
+            name="mainLayout"
+            type="shinei.com.dougaku.helper.ControlSlidingUpPanelLayout" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/player_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/background_image_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:blurImage="@{playerViewModel.songLiveData.coverUrl}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <include
+            layout="@layout/layout_toolbar_player"
+            bind:playerViewModel="@{playerViewModel}"
+            bind:sharedViewModel="@{sharedViewModel}"
+            android:id="@+id/player_toolbar_layout"
+            android:visibility="@{Integer.valueOf(playerViewModel.playerToolbarVisibility)}" />
+
+        <include
+            layout="@layout/layout_player_bottom"
+            bind:playerViewModel="@{playerViewModel}"
+            android:id="@+id/bottom_player_layout"
+            android:visibility="@{Integer.valueOf(playerViewModel.bottomPlayerVisibility)}" />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/track_view_pager"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/title_text_view"
+            app:layout_constraintTop_toBottomOf="@+id/guideline_60dp" />
+
+        <TextView
+            android:id="@+id/title_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:singleLine="true"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@android:color/white"
+            android:text="@{playerViewModel.songLiveData.title}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/artist_text_view" />
+
+        <TextView
+            android:id="@+id/artist_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="20dp"
+            android:singleLine="true"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/gray_light"
+            android:text="@{playerViewModel.songLiveData.artist}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/player_controller_layout" />
+
+        <include
+            layout="@layout/layout_player_controller"
+            bind:playerViewModel="@{playerViewModel}"
+            bind:sharedViewModel="@{sharedViewModel}"
+            android:id="@+id/player_controller_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <include
+            layout="@layout/layout_play_list"
+            bind:playerViewModel="@{playerViewModel}"
+            android:id="@+id/play_list_layout" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_60dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="60dp" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

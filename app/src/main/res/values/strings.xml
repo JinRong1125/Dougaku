@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dougaku</string>
+
+    <string name="song">Song</string>
+    <string name="album">Album</string>
+    <string name="producer">Producer</string>
+    <string name="artist">Artist</string>
+    <string name="genre">Genre</string>
+    <string name="event">Event</string>
+    <string name="myself">Myself</string>
+
+    <string name="liked_tracks">Liked&#160;tracks</string>
+    <string name="liked_albums">Liked&#160;albums</string>
+    <string name="playlists">Playlists</string>
+    <string name="listening_history">Listening&#160;history</string>
+
+    <string name="menu_like_track">Like&#160;track</string>
+    <string name="menu_unlike_track">Unlike&#160;track</string>
+    <string name="menu_like_album">Like&#160;album</string>
+    <string name="menu_unlike_album">Unlike&#160;album</string>
+    <string name="menu_add_to_playlist">Add&#160;to&#160;playlist</string>
+    <string name="menu_remove_from_playlist">Remove&#160;from&#160;playlist</string>
+    <string name="menu_remove_playlist">Remove&#160;playlist</string>
+    <string name="menu_clear_listening_history">Clear&#160;listening&#160;history</string>
+    <string name="option_create_new_playlist">Create&#160;new&#160;playlist</string>
+    <string name="hint_enter_playlist_title">Enter&#160;playlist&#160;title</string>
+
+    <string name="hint_search">&#160;Search</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+
+    <string name="albums">&#160;albums</string>
+    <string name="songs">&#160;songs</string>
+
+    <string name="toast_add_to_liked_tracks">Saved&#160;to&#160;liked&#160;tracks</string>
+    <string name="toast_remove_from_liked_tracks">Removed&#160;from&#160;liked&#160;tracks</string>
+    <string name="toast_add_to_liked_albums">Saved&#160;to&#160;liked&#160;albums</string>
+    <string name="toast_remove_from_liked_albums">Removed&#160;from&#160;liked&#160;albums</string>
+    <string name="toast_add_to_playlist">Saved&#160;to&#160;playlist</string>
+    <string name="toast_remove_from_playlist">Removed&#160;from&#160;playlist</string>
+    <string name="toast_playlist_title_invalid">Please&#160;enter&#160;a&#160;valid&#160;title</string>
+    <string name="toast_remove_playlist">playlist&#160;Removed</string>
+    <string name="toast_clear_listening_history">Listening&#160;history&#160;cleared</string>
+
+    <string name="toast_operation_failed">Operation&#160;failed</string>
+    <string name="toast_connect_failed">Unable&#160;to&#160;connect</string>
+</resources>

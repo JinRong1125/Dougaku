@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="playerViewModel"
+            type="shinei.com.dougaku.viewModel.PlayerViewModel" />
+        <variable
+            name="sharedViewModel"
+            type="shinei.com.dougaku.viewModel.SharedViewModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/player_controller_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/now_time_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:textColor="@android:color/white"
+            app:formatTime="@{playerViewModel.positionSeconds}"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/end_time_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:textColor="@android:color/white"
+            app:formatTime="@{playerViewModel.durationSeconds}"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <SeekBar
+            android:id="@+id/time_seek_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:thumbTint="@color/green_light"
+            android:progressTint="@color/green_light"
+            android:progressBackgroundTint="@android:color/white"
+            android:max="@{playerViewModel.durationSeconds / 1000}"
+            android:progress="@{playerViewModel.positionSeconds / 1000}"
+            android:onProgressChanged="@{(seekBar, progress, fromUser) -> playerViewModel.onProgressChanged(progress, fromUser)}"
+            android:onStartTrackingTouch="@{() -> playerViewModel.startTracking()}"
+            android:onStopTrackingTouch="@{playerViewModel::onStopTrackingTouch}"
+            app:layout_constraintStart_toEndOf="@+id/now_time_text_view"
+            app:layout_constraintEnd_toStartOf="@+id/end_time_text_view" />
+
+        <ImageButton
+            android:id="@+id/heart_image_button"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="60dp"
+            android:background="@{playerViewModel.heartDrawable}"
+            android:onClick="@{(v) -> playerViewModel.like(v, sharedViewModel)}"
+            app:layout_constraintEnd_toEndOf="@+id/shuffle_image_button"
+            app:layout_constraintTop_toBottomOf="@+id/play_pause_image_button"
+            app:layout_constraintBottom_toTopOf="@+id/play_pause_image_button" />
+
+        <ImageButton
+            android:id="@+id/shuffle_image_button"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="80dp"
+            android:background="@{playerViewModel.shuffleDrawable}"
+            android:onClick="@{() -> playerViewModel.shuffle()}"
+            app:layout_constraintEnd_toEndOf="@+id/play_pause_image_button"
+            app:layout_constraintTop_toBottomOf="@+id/play_pause_image_button"
+            app:layout_constraintBottom_toTopOf="@+id/play_pause_image_button" />
+
+        <ImageButton
+            android:id="@+id/play_pause_image_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="20dp"
+            android:background="@{playerViewModel.playpauseDrawable}"
+            android:onClick="@{() -> playerViewModel.playpause()}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/time_seek_bar" />
+
+        <ImageButton
+            android:id="@+id/repeat_image_button"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="80dp"
+            android:background="@{playerViewModel.repeatDrawable}"
+            android:onClick="@{() -> playerViewModel.repeat()}"
+            app:layout_constraintStart_toStartOf="@+id/play_pause_image_button"
+            app:layout_constraintTop_toBottomOf="@+id/play_pause_image_button"
+            app:layout_constraintBottom_toTopOf="@+id/play_pause_image_button" />
+
+        <ImageButton
+            android:id="@+id/play_list_image_button"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="60dp"
+            android:background="@drawable/icon_playlist"
+            android:onClick="@{() -> playerViewModel.openclosePlayList(true)}"
+            app:layout_constraintStart_toStartOf="@+id/repeat_image_button"
+            app:layout_constraintTop_toBottomOf="@+id/play_pause_image_button"
+            app:layout_constraintBottom_toTopOf="@+id/play_pause_image_button" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="artist"
+            type="shinei.com.dougaku.model.Artist" />
+        <variable
+            name="artistPageModel"
+            type="shinei.com.dougaku.viewModel.ArtistPageModel" />
+        <variable
+            name="sharedViewModel"
+            type="shinei.com.dougaku.viewModel.SharedViewModel" />
+        <variable
+            name="songCounts"
+            type="String" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp">
+
+        <ImageView
+            android:id="@+id/artist_image_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="20dp"
+            android:scaleType="centerCrop"
+            app:loadImage="@{artist.imageUrl}"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/name_text_view"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="@{artist.name}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/artist_image_view"
+            style="@style/item_main_title" />
+
+        <TextView
+            android:id="@+id/counts_text_view"
+            android:gravity="center"
+            android:text="@{songCounts}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/name_text_view"
+            style="@style/item_sub_title" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/transparent"
+            android:onClick="@{(v) -> artistPageModel.intentToArtistDetail(v, artist, sharedViewModel.selectedArtist)}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="playerViewModel"
+            type="shinei.com.dougaku.viewModel.PlayerViewModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/bottom_player_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="@{playerViewModel.bottomPlayerAlpha}">
+
+        <ImageView
+            android:id="@+id/album_image_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:loadImage="@{playerViewModel.songLiveData.coverUrl}"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/title_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
+            android:singleLine="true"
+            android:textSize="15sp"
+            android:textColor="@android:color/white"
+            android:text="@{playerViewModel.songLiveData.title}"
+            app:layout_constraintStart_toEndOf="@+id/album_image_view"
+            app:layout_constraintEnd_toStartOf="@+id/play_pause_image_button"
+            app:layout_constraintBottom_toTopOf="@+id/guideline_50" />
+
+        <TextView
+            android:id="@+id/artist_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
+            android:singleLine="true"
+            android:textSize="15sp"
+            android:textColor="@color/gray_light"
+            android:text="@{playerViewModel.songLiveData.artist}"
+            app:layout_constraintStart_toEndOf="@+id/album_image_view"
+            app:layout_constraintEnd_toStartOf="@+id/play_pause_image_button"
+            app:layout_constraintTop_toBottomOf="@+id/guideline_50" />
+
+        <ImageButton
+            android:id="@+id/play_pause_image_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="15dp"
+            android:background="@{playerViewModel.buttomPlaypauseDrawable}"
+            android:onClick="@{() -> playerViewModel.playpause()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <Button
+            android:id="@+id/move_player_button"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="20dp"
+            android:clickable="false"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toStartOf="@+id/play_pause_image_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guideline_50"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.5" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

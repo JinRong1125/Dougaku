@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="playerViewModel"
+            type="shinei.com.dougaku.viewModel.PlayerViewModel" />
+        <variable
+            name="sharedViewModel"
+            type="shinei.com.dougaku.viewModel.SharedViewModel" />
+    </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/player_toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="@{playerViewModel.playerToolbarAlpha}">
+
+        <ImageButton
+            android:id="@+id/hide_image_button"
+            android:background="@drawable/icon_hide"
+            android:onClick="@{() -> playerViewModel.hide()}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/image_button" />
+
+        <ImageButton
+            android:id="@+id/option_image_button"
+            android:background="@drawable/icon_option"
+            android:onClick="@{(v) -> playerViewModel.optionPopupMenu(v, sharedViewModel)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/image_button" />
+
+    </android.support.constraint.ConstraintLayout>
+</layout>

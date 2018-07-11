@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <layout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <data>
+            <variable
+                name="searchViewModel"
+                type="shinei.com.dougaku.viewModel.SearchViewModel" />
+        </data>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/search_toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/back_image_button"
+            android:background="@drawable/icon_back"
+            android:onClick="@{(v) -> searchViewModel.onBackPressed(v)}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/image_button" />
+
+        <android.support.v7.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            app:iconifiedByDefault="false"
+            app:queryHint="@string/hint_search"
+            app:queryBackground="@android:color/transparent"
+            app:searchIcon="@null"
+            app:searchHintIcon="@null"
+            app:closeIcon="@drawable/icon_close_16dp"
+            app:layout_constraintStart_toEndOf="@+id/back_image_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/back_image_button"
+            app:layout_constraintBottom_toBottomOf="@+id/back_image_button" />
+
+    </android.support.constraint.ConstraintLayout>
+
+</layout>
