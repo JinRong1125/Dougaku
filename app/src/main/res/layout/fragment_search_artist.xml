@@ -43,7 +43,7 @@
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_gravity="center"
-                    android:background="@drawable/icon_big"
+                    android:background="@drawable/icon_app_128dp"
                     android:visibility="@{searchArtistModel.emptyImageVisibility}" />
 
             </FrameLayout>

@@ -95,14 +95,14 @@ class PlayerFragment: FrameFragment() {
         playerViewModel.playListOpened.observe(this, Observer {
             it?.run {
                 if (!it) {
-                    playListLayout.animate().alpha(0f)
+                    playListLayout.animate().alpha(0f).setDuration(100)
                             .withEndAction({playListLayout.visibility = View.GONE})
                     fragmentPlayerBinding.mainLayout?.isTouchEnabled = true
                 }
                 else {
                     fragmentPlayerBinding.mainLayout?.isTouchEnabled = false
                     fragmentPlayerBinding.playListLayout!!.playlistRecyclerView.scrollToPosition(playerViewModel.currentTrack.value!!)
-                    playListLayout.animate().alpha(1f)
+                    playListLayout.animate().alpha(1f).setDuration(100)
                             .withStartAction({playListLayout.visibility = View.VISIBLE})
                 }
             }

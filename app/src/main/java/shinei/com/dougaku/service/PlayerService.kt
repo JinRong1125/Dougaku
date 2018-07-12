@@ -307,7 +307,7 @@ class PlayerService: Service() {
                 .setShowActionsInCompactView(0, 1, 2, 3)
         val notification = NotificationCompat.Builder(applicationContext, PLAYER_NOTIFICATION_CHANNEL_ID)
                 .setColor(ContextCompat.getColor(applicationContext, R.color.green_half))
-                .setSmallIcon(R.drawable.icon_small)
+                .setSmallIcon(R.drawable.icon_app_24dp)
                 .setLargeIcon(albumBitmap)
                 .setContentIntent(applicationIntent)
                 .setContentTitle(currentSong?.title)

@@ -16,7 +16,7 @@
 
         <ImageButton
             android:id="@+id/menu_image_button"
-            android:background="@drawable/icon_big"
+            android:background="@drawable/icon_app_128dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
