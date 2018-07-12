@@ -8,7 +8,8 @@ import shinei.com.dougaku.model.*
 
 interface DougakuService {
     companion object {
-        const val BASE_URL = "http://192.168.1.105:8080/"
+        const val BASE_URL = "https://dougaku.herokuapp.com/"
+//        const val BASE_URL = "http://192.168.1.105:8080/"
     }
 
     @POST("api/albums")
