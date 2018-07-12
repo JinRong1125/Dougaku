@@ -127,7 +127,6 @@ class PlayerFragment: FrameFragment() {
         playerViewModel.songLiveData.observe(this, Observer {
             it?.run {
                 playerViewModel.getLikedTrack(it)
-                playerViewModel.delayLoadTrack(it)
             }
         })
         playerViewModel.playModel.observe(this, Observer {

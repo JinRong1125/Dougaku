@@ -210,11 +210,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun prepareTrack(targetTrack: Int) {
-        Intent(application, PlayerService::class.java).apply {
-            action = STOP
-            application.startService(this)
-        }
-        disposable?.dispose()
+        delayLoadTrack(songsLiveData.value!![targetTrack])
 
         if (!isUIUnUpdated) {
             isUIUnUpdated = true
@@ -227,6 +223,11 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun delayLoadTrack(targetSong: Song) {
+        Intent(application, PlayerService::class.java).apply {
+            action = STOP
+            application.startService(this)
+        }
+        disposable?.dispose()
         disposable = Observable.timer(1000, TimeUnit.MILLISECONDS).subscribe({
             if (!haveSettings) {
                 Intent(application, PlayerService::class.java).apply {
