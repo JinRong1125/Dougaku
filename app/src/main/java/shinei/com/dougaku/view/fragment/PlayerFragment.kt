@@ -182,12 +182,6 @@ class PlayerFragment: FrameFragment() {
             val mainLayout = (activity as MainActivity).findViewById(R.id.main_panel_layout) as ControlSlidingUpPanelLayout
             mainLayout.addPanelSlideListener(playerViewModel.panelSlideListener)
             fragmentPlayerBinding.mainLayout = mainLayout
-
-            val layoutParams =
-                    fragmentPlayerBinding.trackViewPager.layoutParams as ConstraintLayout.LayoutParams
-            layoutParams.marginStart = (fragmentPlayerBinding.playerLayout.width -
-                    fragmentPlayerBinding.trackViewPager.width) / 2
-            fragmentPlayerBinding.trackViewPager.layoutParams = layoutParams
         }
 
         playerViewModel.initialService()
