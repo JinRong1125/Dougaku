@@ -9,6 +9,7 @@ import android.view.View
 import io.reactivex.disposables.CompositeDisposable
 import shinei.com.dougaku.R
 import shinei.com.dougaku.api.DougakuRepository
+import shinei.com.dougaku.helper.RxSchedulersHelper
 import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.Album
 import shinei.com.dougaku.model.Artist
@@ -85,7 +86,36 @@ class ArtistDetailModel @Inject constructor(val application: Application,
     }
 
     fun trackPopupMenu(view: View, sharedViewModel: SharedViewModel, song: Song) {
-        Utils.createTrackPopupMenu(view, compositeDisposable, likedTracksDao, myPlaylistsDao, sharedViewModel, song)
+        val context = view.context
+        val popupMenu = PopupMenu(context, view)
+        var likedTrack = false
+        var likedTrackId = 0
+
+        popupMenu.menu.add(0, 1, 1, context.getString(R.string.menu_add_to_playlist))
+        compositeDisposable.add(likedTracksDao.getLikedTrack(song.songId)
+                .compose(RxSchedulersHelper.singleIoToMain())
+                .subscribe({
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_unlike_track))
+                    likedTrack = true
+                    likedTrackId = it.id
+                    popupMenu.show()
+                }, {
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_like_track))
+                    popupMenu.show()
+                }))
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                0 -> {
+                    if (!likedTrack)
+                        Utils.insertLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, song)
+                    else
+                        Utils.deleteLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, likedTrackId, song)
+                }
+                1 ->
+                    Utils.createPlaylistDialog(context, compositeDisposable, myPlaylistsDao, sharedViewModel, arrayListOf(song))
+            }
+            true
+        }
     }
 
     fun intentToAlbumDetail(view: View, album: Album, selectedAlbum: MutableLiveData<Album>) {

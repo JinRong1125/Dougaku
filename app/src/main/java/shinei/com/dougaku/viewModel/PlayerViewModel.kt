@@ -3,14 +3,13 @@ package shinei.com.dougaku.viewModel
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.graphics.drawable.Drawable
 import android.os.IBinder
 import android.support.v4.view.ViewPager
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
+import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -19,15 +18,21 @@ import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import shinei.com.dougaku.R
+import shinei.com.dougaku.api.DougakuRepository
 import shinei.com.dougaku.helper.*
+import shinei.com.dougaku.model.AlbumId
+import shinei.com.dougaku.model.ArtistName
 import shinei.com.dougaku.model.Song
 import shinei.com.dougaku.room.*
 import shinei.com.dougaku.service.PlayerService
+import shinei.com.dougaku.view.fragment.AlbumDetailFragment
+import shinei.com.dougaku.view.fragment.ArtistDetailFragment
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class PlayerViewModel @Inject constructor(val application: Application,
+                                          val dougakuRepository: DougakuRepository,
                                           val likedTracksDao: LikedTracksDao,
                                           val myPlaylistsDao: MyPlaylistsDao,
                                           val historyTracksDao: HistoryTracksDao,
@@ -47,6 +52,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
     val bottomPlayerAlpha = MutableLiveData<Float>()
     val playerToolbarVisibility = MutableLiveData<Int>()
     val bottomPlayerVisibility = MutableLiveData<Int>()
+    val progressBarLayoutVisibility = MutableLiveData<Int>()
     val playListOpened = MutableLiveData<Boolean>()
 
     val playpauseDrawable = MutableLiveData<Drawable>()
@@ -79,6 +85,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
         bottomPlayerAlpha.postValue(1f)
         playerToolbarVisibility.postValue(View.GONE)
         bottomPlayerVisibility.postValue(View.VISIBLE)
+        progressBarLayoutVisibility.postValue(View.GONE)
         playListOpened.postValue(false)
         playpauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_play))
         buttomPlaypauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_play))
@@ -305,10 +312,21 @@ class PlayerViewModel @Inject constructor(val application: Application,
     fun optionPopupMenu(view: View, sharedViewModel: SharedViewModel) {
         val popupMenu = PopupMenu(view.context, view)
         popupMenu.menu.add(0, 0, 0, application.getString(R.string.menu_add_to_playlist))
+        popupMenu.menu.add(0, 1, 1, application.getString(R.string.menu_go_to_album))
+        popupMenu.menu.add(0, 2, 2, application.getString(R.string.menu_go_to_artist))
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 0 ->
                     Utils.createPlaylistDialog(view.context, compositeDisposable, myPlaylistsDao, sharedViewModel, arrayListOf(songLiveData.value!!))
+                1 ->
+                    goToAlbum(view, sharedViewModel, songLiveData.value!!.albumId)
+                2 -> {
+                    val artistList = songLiveData.value!!.artistList
+                    if (artistList.size > 1)
+                        createArtistDialog(view, sharedViewModel, artistList)
+                    else
+                        goToArtist(view, sharedViewModel, artistList[0])
+                }
             }
             true
         }
@@ -316,7 +334,104 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun trackPopupMenu(view: View, sharedViewModel: SharedViewModel, song: Song) {
-        Utils.createTrackPopupMenu(view, compositeDisposable, likedTracksDao, myPlaylistsDao, sharedViewModel, song)
+        val context = view.context
+        val popupMenu = PopupMenu(context, view)
+        var likedTrack = false
+        var likedTrackId = 0
+
+        popupMenu.menu.add(0, 1, 1, context.getString(R.string.menu_add_to_playlist))
+        popupMenu.menu.add(0, 2, 2, application.getString(R.string.menu_go_to_album))
+        popupMenu.menu.add(0, 3, 3, application.getString(R.string.menu_go_to_artist))
+        compositeDisposable.add(likedTracksDao.getLikedTrack(song.songId)
+                .compose(RxSchedulersHelper.singleIoToMain())
+                .subscribe({
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_unlike_track))
+                    likedTrack = true
+                    likedTrackId = it.id
+                    popupMenu.show()
+                }, {
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_like_track))
+                    popupMenu.show()
+                }))
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                0 -> {
+                    if (!likedTrack)
+                        Utils.insertLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, song)
+                    else
+                        Utils.deleteLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, likedTrackId, song)
+                }
+                1 ->
+                    Utils.createPlaylistDialog(context, compositeDisposable, myPlaylistsDao, sharedViewModel, arrayListOf(song))
+                2 ->
+                    goToAlbum(view, sharedViewModel, song.albumId)
+                3 -> {
+                    if (song.artistList.size > 1)
+                        createArtistDialog(view, sharedViewModel, song.artistList)
+                    else
+                        goToArtist(view, sharedViewModel, song.artistList[0])
+                }
+            }
+            true
+        }
+    }
+
+    fun goToAlbum(view: View, sharedViewModel: SharedViewModel, albumId: Int) {
+        playListOpened.postValue(false)
+        val selectedAlbumValue = sharedViewModel.selectedAlbum.value
+        if (selectedAlbumValue != null && selectedAlbumValue.albumId == albumId) {
+            Utils.addFrameFragment(view, AlbumDetailFragment())
+            hide()
+        }
+        else {
+            compositeDisposable.add(dougakuRepository.loadAlbums(AlbumId(albumId))
+                    .doOnSubscribe({
+                        progressBarLayoutVisibility.postValue(View.VISIBLE)
+                    })
+                    .subscribe({
+                        progressBarLayoutVisibility.postValue(View.GONE)
+                        sharedViewModel.selectedAlbum.postValue(it[0])
+                        Utils.addFrameFragment(view, AlbumDetailFragment())
+                        hide()
+                    }, {
+                        progressBarLayoutVisibility.postValue(View.GONE)
+                        dougakuRepository.showError(application)
+                    }))
+        }
+    }
+
+    fun goToArtist(view: View, sharedViewModel: SharedViewModel, artistName: String) {
+        playListOpened.postValue(false)
+        val selectedArtistValue = sharedViewModel.selectedArtist.value
+        if (selectedArtistValue != null && selectedArtistValue.name == artistName) {
+            Utils.addFrameFragment(view, ArtistDetailFragment())
+            hide()
+        }
+        else {
+            compositeDisposable.add(dougakuRepository.loadArtists(ArtistName(artistName))
+                    .doOnSubscribe({
+                        progressBarLayoutVisibility.postValue(View.VISIBLE)
+                    })
+                    .subscribe({
+                        progressBarLayoutVisibility.postValue(View.GONE)
+                        sharedViewModel.selectedArtist.postValue(it[0])
+                        Utils.addFrameFragment(view, ArtistDetailFragment())
+                        hide()
+                    }, {
+                        progressBarLayoutVisibility.postValue(View.GONE)
+                        dougakuRepository.showError(application)
+                    }))
+        }
+    }
+
+    fun createArtistDialog(view: View, sharedViewModel: SharedViewModel, artistList: List<String>) {
+        val context = view.context
+        val alertDialog = AlertDialog.Builder(context)
+        alertDialog.setTitle(context.getString(R.string.menu_go_to_artist))
+        alertDialog.setItems(artistList.toTypedArray(), DialogInterface.OnClickListener { dialog, which ->
+            goToArtist(view, sharedViewModel, artistList[which])
+        })
+        alertDialog.show()
     }
 
     fun playpause(){

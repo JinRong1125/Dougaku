@@ -50,7 +50,7 @@
             android:id="@+id/album_text_view"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="20dp"
-            android:text="@{song.album}"
+            android:text="@{song.artist}"
             app:layout_constraintStart_toEndOf="@+id/album_image_view"
             app:layout_constraintEnd_toStartOf="@+id/option_image_button"
             app:layout_constraintTop_toBottomOf="@+id/guideline_50"

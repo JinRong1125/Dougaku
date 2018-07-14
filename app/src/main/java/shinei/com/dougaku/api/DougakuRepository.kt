@@ -21,12 +21,24 @@ class DougakuRepository {
         return dougakuService.loadAlbums(RequestObject()).retry(3)
     }
 
+    fun loadAlbums(albumId: AlbumId): Observable<List<Album>> {
+        return dougakuService.loadAlbums(albumId).retry(3)
+    }
+
     fun loadProducers(): Observable<List<Producer>> {
         return dougakuService.loadProducers(RequestObject()).retry(3)
     }
 
+    fun loadProducers(producerId: ProducerId): Observable<List<Producer>> {
+        return dougakuService.loadProducers(producerId).retry(3)
+    }
+
     fun loadArtists(): Observable<List<Artist>> {
         return dougakuService.loadArtists(RequestObject()).retry(3)
+    }
+
+    fun loadArtists(artistName: ArtistName): Observable<List<Artist>> {
+        return dougakuService.loadArtists(artistName).retry(3)
     }
 
     fun loadAlbumSongs(albumId: Int): Observable<List<Song>> {

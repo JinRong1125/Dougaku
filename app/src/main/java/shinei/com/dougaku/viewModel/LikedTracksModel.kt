@@ -7,6 +7,7 @@ import android.view.View
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import shinei.com.dougaku.api.DougakuRepository
 import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.Song
 import shinei.com.dougaku.room.LikedTracksDao
@@ -16,6 +17,7 @@ import java.util.*
 import javax.inject.Inject
 
 class LikedTracksModel @Inject constructor(val application: Application,
+                                           val dougakuRepository: DougakuRepository,
                                            val likedTracksDao: LikedTracksDao,
                                            val myPlaylistsDao: MyPlaylistsDao): ViewModel() {
 
@@ -57,7 +59,7 @@ class LikedTracksModel @Inject constructor(val application: Application,
     }
 
     fun trackPopupMenu(view: View, sharedViewModel: SharedViewModel, song: Song) {
-        Utils.createTrackPopupMenu(view, compositeDisposable, likedTracksDao, myPlaylistsDao, sharedViewModel, song)
+        Utils.createTrackPopupMenu(view, compositeDisposable, dougakuRepository, likedTracksDao, myPlaylistsDao, sharedViewModel, song, refreshing)
     }
 
     fun intentToPlayer(position: Int, sharedViewModel: SharedViewModel) {

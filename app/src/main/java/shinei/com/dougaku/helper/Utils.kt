@@ -1,5 +1,7 @@
 package shinei.com.dougaku.helper
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.content.Context
 import android.content.DialogInterface
 import android.databinding.BindingAdapter
@@ -23,11 +25,14 @@ import io.reactivex.disposables.CompositeDisposable
 import jp.wasabeef.glide.transformations.BlurTransformation
 import jp.wasabeef.glide.transformations.ColorFilterTransformation
 import shinei.com.dougaku.R
-import shinei.com.dougaku.model.Album
-import shinei.com.dougaku.model.Song
+import shinei.com.dougaku.api.DougakuRepository
+import shinei.com.dougaku.model.*
 import shinei.com.dougaku.room.*
 import shinei.com.dougaku.view.activity.MainActivity
 import shinei.com.dougaku.view.base.FrameFragment
+import shinei.com.dougaku.view.fragment.AlbumDetailFragment
+import shinei.com.dougaku.view.fragment.ArtistDetailFragment
+import shinei.com.dougaku.view.fragment.ProducerDetailFragment
 import shinei.com.dougaku.viewModel.SharedViewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -67,13 +72,15 @@ object Utils{
             imageView.visibility = View.VISIBLE
     }
 
-    fun createTrackPopupMenu(view: View, compositeDisposable: CompositeDisposable, likedTracksDao: LikedTracksDao, myPlaylistsDao: MyPlaylistsDao, sharedViewModel: SharedViewModel, song: Song) {
+    fun createTrackPopupMenu(view: View, compositeDisposable: CompositeDisposable, dougakuRepository: DougakuRepository, likedTracksDao: LikedTracksDao, myPlaylistsDao: MyPlaylistsDao, sharedViewModel: SharedViewModel, song: Song, refreshing: MutableLiveData<Boolean>) {
         val context = view.context
         val popupMenu = PopupMenu(context, view)
         var likedTrack = false
         var likedTrackId = 0
 
         popupMenu.menu.add(0, 1, 1, context.getString(R.string.menu_add_to_playlist))
+        popupMenu.menu.add(0, 2, 2, context.getString(R.string.menu_go_to_album))
+        popupMenu.menu.add(0, 3, 3, context.getString(R.string.menu_go_to_artist))
         compositeDisposable.add(likedTracksDao.getLikedTrack(song.songId)
                 .compose(RxSchedulersHelper.singleIoToMain())
                 .subscribe({
@@ -89,12 +96,20 @@ object Utils{
             when (menuItem.itemId) {
                 0 -> {
                     if (!likedTrack)
-                        insertLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, song)
+                        Utils.insertLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, song)
                     else
-                        deleteLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, likedTrackId, song)
+                        Utils.deleteLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, likedTrackId, song)
                 }
                 1 ->
-                    createPlaylistDialog(context, compositeDisposable, myPlaylistsDao, sharedViewModel, arrayListOf(song))
+                    Utils.createPlaylistDialog(context, compositeDisposable, myPlaylistsDao, sharedViewModel, arrayListOf(song))
+                2 ->
+                    goToAlbum(view, compositeDisposable, dougakuRepository, sharedViewModel, song.albumId, refreshing)
+                3 -> {
+                    if (song.artistList.size > 1)
+                        createArtistDialog(view, compositeDisposable, dougakuRepository, sharedViewModel, song.artistList, refreshing)
+                    else
+                        goToArtist(view, compositeDisposable, dougakuRepository, sharedViewModel, song.artistList[0], refreshing)
+                }
             }
             true
         }
@@ -134,6 +149,76 @@ object Utils{
                     })
                     alertDialog.show()
                 }, {}))
+    }
+
+    fun createArtistDialog(view: View, compositeDisposable: CompositeDisposable, dougakuRepository: DougakuRepository, sharedViewModel: SharedViewModel, artistList: List<String>, refreshing: MutableLiveData<Boolean>) {
+        val context = view.context
+        val alertDialog = AlertDialog.Builder(context)
+        alertDialog.setTitle(context.getString(R.string.menu_go_to_artist))
+        alertDialog.setItems(artistList.toTypedArray(), DialogInterface.OnClickListener { dialog, which ->
+            goToArtist(view, compositeDisposable, dougakuRepository, sharedViewModel, artistList[which], refreshing)
+        })
+        alertDialog.show()
+    }
+
+    fun goToAlbum(view: View, compositeDisposable: CompositeDisposable, dougakuRepository: DougakuRepository, sharedViewModel: SharedViewModel, albumId: Int, refreshing: MutableLiveData<Boolean>) {
+        val selectedAlbumValue = sharedViewModel.selectedAlbum.value
+        if (selectedAlbumValue != null && selectedAlbumValue.albumId == albumId)
+            Utils.addFrameFragment(view, AlbumDetailFragment())
+        else {
+            compositeDisposable.add(dougakuRepository.loadAlbums(AlbumId(albumId))
+                    .doOnSubscribe({
+                        refreshing.postValue(true)
+                    })
+                    .subscribe({
+                        refreshing.postValue(false)
+                        sharedViewModel.selectedAlbum.postValue(it[0])
+                        Utils.addFrameFragment(view, AlbumDetailFragment())
+                    }, {
+                        refreshing.postValue(false)
+                        dougakuRepository.showError(view.context)
+                    }))
+        }
+    }
+
+    fun goToArtist(view: View, compositeDisposable: CompositeDisposable, dougakuRepository: DougakuRepository, sharedViewModel: SharedViewModel, artistName: String, refreshing: MutableLiveData<Boolean>) {
+        val selectedArtistValue = sharedViewModel.selectedArtist.value
+        if (selectedArtistValue != null && selectedArtistValue.name == artistName)
+            Utils.addFrameFragment(view, ArtistDetailFragment())
+        else {
+            compositeDisposable.add(dougakuRepository.loadArtists(ArtistName(artistName))
+                    .doOnSubscribe({
+                        refreshing.postValue(true)
+                    })
+                    .subscribe({
+                        refreshing.postValue(false)
+                        sharedViewModel.selectedArtist.postValue(it[0])
+                        Utils.addFrameFragment(view, ArtistDetailFragment())
+                    }, {
+                        refreshing.postValue(false)
+                        dougakuRepository.showError(view.context)
+                    }))
+        }
+    }
+
+    fun goToProducer(view: View, compositeDisposable: CompositeDisposable, dougakuRepository: DougakuRepository, sharedViewModel: SharedViewModel, producerId: Int, refreshing: MutableLiveData<Boolean>) {
+        val selectedProducerValue = sharedViewModel.selectedProducer.value
+        if (selectedProducerValue != null && selectedProducerValue.producerId == producerId)
+            Utils.addFrameFragment(view, ProducerDetailFragment())
+        else {
+            compositeDisposable.add(dougakuRepository.loadProducers(ProducerId(producerId))
+                    .doOnSubscribe({
+                        refreshing.postValue(true)
+                    })
+                    .subscribe({
+                        refreshing.postValue(false)
+                        sharedViewModel.selectedProducer.postValue(it[0])
+                        Utils.addFrameFragment(view, ProducerDetailFragment())
+                    }, {
+                        refreshing.postValue(false)
+                        dougakuRepository.showError(view.context)
+                    }))
+        }
     }
 
     fun insertLikedTracks(context: Context, compositeDisposable: CompositeDisposable, likedTracksDao: LikedTracksDao, sharedViewModel: SharedViewModel, song: Song) {

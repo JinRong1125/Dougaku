@@ -3,7 +3,9 @@ package shinei.com.dougaku.viewModel
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
+import android.content.DialogInterface
 import android.support.design.widget.AppBarLayout
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
 import android.view.View
 import io.reactivex.Completable
@@ -13,9 +15,13 @@ import shinei.com.dougaku.api.DougakuRepository
 import shinei.com.dougaku.helper.RxSchedulersHelper
 import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.Album
+import shinei.com.dougaku.model.ArtistName
+import shinei.com.dougaku.model.ProducerId
 import shinei.com.dougaku.model.Song
 import shinei.com.dougaku.room.*
 import shinei.com.dougaku.view.activity.MainActivity
+import shinei.com.dougaku.view.fragment.ArtistDetailFragment
+import shinei.com.dougaku.view.fragment.ProducerDetailFragment
 import javax.inject.Inject
 
 class AlbumDetailModel @Inject constructor(val application: Application,
@@ -96,6 +102,7 @@ class AlbumDetailModel @Inject constructor(val application: Application,
 
         if (loadCompleted.value!!)
             popupMenu.menu.add(0, 1, 1, application.getString(R.string.menu_add_to_playlist))
+        popupMenu.menu.add(0, 2, 2, application.getString(R.string.menu_go_to_producer))
         compositeDisposable.add(likedAlbumsDao.getLikedAlbum(album.albumId)
                 .compose(RxSchedulersHelper.singleIoToMain())
                 .subscribe({
@@ -117,13 +124,51 @@ class AlbumDetailModel @Inject constructor(val application: Application,
                 }
                 1 ->
                     Utils.createPlaylistDialog(view.context, compositeDisposable, myPlaylistsDao, sharedViewModel, ArrayList(songsLiveData.value!!))
+                2 ->
+                    Utils.goToProducer(view, compositeDisposable, dougakuRepository, sharedViewModel, albumLiveData.value!!.producerId, refreshing)
             }
             true
         }
     }
 
     fun trackPopupMenu(view: View, sharedViewModel: SharedViewModel, song: Song) {
-        Utils.createTrackPopupMenu(view, compositeDisposable, likedTracksDao, myPlaylistsDao, sharedViewModel, song)
+        val context = view.context
+        val popupMenu = PopupMenu(context, view)
+        var likedTrack = false
+        var likedTrackId = 0
+
+        popupMenu.menu.add(0, 1, 1, context.getString(R.string.menu_add_to_playlist))
+        popupMenu.menu.add(0, 2, 2, application.getString(R.string.menu_go_to_artist))
+        compositeDisposable.add(likedTracksDao.getLikedTrack(song.songId)
+                .compose(RxSchedulersHelper.singleIoToMain())
+                .subscribe({
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_unlike_track))
+                    likedTrack = true
+                    likedTrackId = it.id
+                    popupMenu.show()
+                }, {
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_like_track))
+                    popupMenu.show()
+                }))
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                0 -> {
+                    if (!likedTrack)
+                        Utils.insertLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, song)
+                    else
+                        Utils.deleteLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, likedTrackId, song)
+                }
+                1 ->
+                    Utils.createPlaylistDialog(context, compositeDisposable, myPlaylistsDao, sharedViewModel, arrayListOf(song))
+                2 -> {
+                    if (song.artistList.size > 1)
+                        Utils.createArtistDialog(view, compositeDisposable, dougakuRepository, sharedViewModel, song.artistList, refreshing)
+                    else
+                        Utils.goToArtist(view, compositeDisposable, dougakuRepository, sharedViewModel, song.artistList[0], refreshing)
+                }
+            }
+            true
+        }
     }
 
     fun intentToPlayer(position: Int, sharedViewModel: SharedViewModel) {

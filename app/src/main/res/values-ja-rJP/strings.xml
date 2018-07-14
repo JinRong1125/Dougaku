@@ -23,6 +23,9 @@
     <string name="menu_remove_from_playlist">プレイリストから削除</string>
     <string name="menu_remove_playlist">プレイリストを削除</string>
     <string name="menu_clear_listening_history">再生履歴を全て削除</string>
+    <string name="menu_go_to_album">アルバムをチェック</string>
+    <string name="menu_go_to_artist">アーティストをチェック</string>
+    <string name="menu_go_to_producer">プロデューサーをチェック</string>
     <string name="option_create_new_playlist">プレイリストを作成</string>
     <string name="hint_enter_playlist_title">プレイリストのタイトルを入力</string>
 

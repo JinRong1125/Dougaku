@@ -41,7 +41,8 @@ class ProducerDetailFragment: FrameFragment() {
 
         sharedViewModel.selectedProducer.observe(this, Observer {
             it?.run {
-                producerDetailModel.producerLiveData.postValue(it)
+                if (producerDetailModel.producerLiveData.value == null)
+                    producerDetailModel.producerLiveData.postValue(it)
             }
         })
         producerDetailModel.producerLiveData.observe(this, Observer {

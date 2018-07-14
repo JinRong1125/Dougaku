@@ -46,7 +46,7 @@ class PlayerFragment: FrameFragment() {
             true
         }
         else if (fragmentPlayerBinding.mainLayout?.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-            playerViewModel.panelState.postValue(SlidingUpPanelLayout.PanelState.COLLAPSED)
+            playerViewModel.hide()
             true
         }
         else
@@ -112,7 +112,7 @@ class PlayerFragment: FrameFragment() {
                 trackViewPager.adapter = TrackPagerAdapter(it)
                 fragmentPlayerBinding.playListLayout!!.playlistRecyclerView.adapter = PlayListAdapter(it, playerViewModel, sharedViewModel)
                 playerViewModel.prepareTrack(sharedViewModel.selectedTrack.value!!)
-                playerViewModel.panelState.postValue(SlidingUpPanelLayout.PanelState.COLLAPSED)
+                playerViewModel.hide()
             }
         })
         playerViewModel.currentTrack.observe(this, Observer {

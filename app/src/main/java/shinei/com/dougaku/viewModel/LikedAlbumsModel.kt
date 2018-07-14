@@ -7,16 +7,20 @@ import android.support.v7.widget.PopupMenu
 import android.view.View
 import io.reactivex.disposables.CompositeDisposable
 import shinei.com.dougaku.R
+import shinei.com.dougaku.api.DougakuRepository
 import shinei.com.dougaku.helper.RxSchedulersHelper
 import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.Album
+import shinei.com.dougaku.model.ProducerId
 import shinei.com.dougaku.room.LikedAlbumsDao
 import shinei.com.dougaku.view.activity.MainActivity
 import shinei.com.dougaku.view.fragment.AlbumDetailFragment
+import shinei.com.dougaku.view.fragment.ProducerDetailFragment
 import java.util.*
 import javax.inject.Inject
 
 class LikedAlbumsModel @Inject constructor(val application: Application,
+                                           val dougakuRepository: DougakuRepository,
                                            val likedAlbumsDao: LikedAlbumsDao): ViewModel() {
 
     val compositeDisposable = CompositeDisposable()
@@ -60,6 +64,7 @@ class LikedAlbumsModel @Inject constructor(val application: Application,
         var likedAlbum = false
         var likedAlbumId = 0
 
+        popupMenu.menu.add(0, 1, 1, application.getString(R.string.menu_go_to_producer))
         compositeDisposable.add(likedAlbumsDao.getLikedAlbum(album.albumId)
                 .compose(RxSchedulersHelper.singleIoToMain())
                 .subscribe({
@@ -79,6 +84,8 @@ class LikedAlbumsModel @Inject constructor(val application: Application,
                     else
                         Utils.deleteLikedAlbums(view.context, compositeDisposable, likedAlbumsDao, sharedViewModel, likedAlbumId, album)
                 }
+                1 ->
+                    Utils.goToProducer(view, compositeDisposable, dougakuRepository, sharedViewModel, album.producerId, refreshing)
             }
             true
         }

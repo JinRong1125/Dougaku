@@ -14,7 +14,8 @@ data class Song(
         @SerializedName("album") val album: String,
         @SerializedName("url_cover") val coverUrl: String,
         @SerializedName("artist") val artist: String,
-        @SerializedName("genre") val genre: String): Parcelable {
+        @SerializedName("genre") val genre: String,
+        @SerializedName("artist_list") val artistList: List<String>): Parcelable {
 
     constructor(parcel: Parcel) : this(
             parcel.readInt(),
@@ -26,7 +27,8 @@ data class Song(
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
-            parcel.readString())
+            parcel.readString(),
+            parcel.createStringArrayList())
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeInt(songId)
@@ -39,6 +41,7 @@ data class Song(
         dest.writeString(coverUrl)
         dest.writeString(artist)
         dest.writeString(genre)
+        dest.writeStringList(artistList)
     }
 
     override fun describeContents(): Int {

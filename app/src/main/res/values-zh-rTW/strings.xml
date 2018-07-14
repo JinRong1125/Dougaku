@@ -23,6 +23,9 @@
     <string name="menu_remove_from_playlist">從播放歌單刪除</string>
     <string name="menu_remove_playlist">刪除播放歌單</string>
     <string name="menu_clear_listening_history">刪除所有播放紀錄</string>
+    <string name="menu_go_to_album">查看專輯</string>
+    <string name="menu_go_to_artist">查看藝術家</string>
+    <string name="menu_go_to_producer">查看發行者</string>
     <string name="option_create_new_playlist">加入新的播放歌單</string>
     <string name="hint_enter_playlist_title">輸入播放歌單的名稱</string>
 

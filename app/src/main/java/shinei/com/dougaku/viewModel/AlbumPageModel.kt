@@ -6,6 +6,7 @@ import android.arch.lifecycle.ViewModel
 import android.view.View
 import io.reactivex.disposables.CompositeDisposable
 import shinei.com.dougaku.api.DougakuRepository
+import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.Album
 import shinei.com.dougaku.view.fragment.AlbumDetailFragment
 import javax.inject.Inject
@@ -39,6 +40,6 @@ class AlbumPageModel @Inject constructor(val application: Application,
 
     fun intentToAlbumDetail(view: View, album: Album, selectedAlbum: MutableLiveData<Album>) {
         selectedAlbum.postValue(album)
-        shinei.com.dougaku.helper.Utils.addFrameFragment(view, AlbumDetailFragment())
+        Utils.addFrameFragment(view, AlbumDetailFragment())
     }
 }

@@ -42,7 +42,8 @@ class AlbumDetailFragment: FrameFragment() {
 
         sharedViewModel.selectedAlbum.observe(this, Observer {
             it?.run {
-                albumDetailModel.albumLiveData.postValue(it)
+                if (albumDetailModel.albumLiveData.value == null)
+                    albumDetailModel.albumLiveData.postValue(it)
             }
         })
         albumDetailModel.albumLiveData.observe(this, Observer {

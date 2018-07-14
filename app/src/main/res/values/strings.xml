@@ -23,6 +23,9 @@
     <string name="menu_remove_from_playlist">Remove&#160;from&#160;playlist</string>
     <string name="menu_remove_playlist">Remove&#160;playlist</string>
     <string name="menu_clear_listening_history">Clear&#160;listening&#160;history</string>
+    <string name="menu_go_to_album">Go&#160;to&#160;album</string>
+    <string name="menu_go_to_artist">Go&#160;to&#160;artist</string>
+    <string name="menu_go_to_producer">Go&#160;to&#160;producer</string>
     <string name="option_create_new_playlist">Create&#160;new&#160;playlist</string>
     <string name="hint_enter_playlist_title">Enter&#160;playlist&#160;title</string>
 

@@ -47,7 +47,8 @@ class ArtistDetailFragment: FrameFragment() {
 
         sharedViewModel.selectedArtist.observe(this, Observer {
             it?.run {
-                artistDetailModel.artistLiveData.postValue(it)
+                if (artistDetailModel.artistLiveData.value == null)
+                    artistDetailModel.artistLiveData.postValue(it)
             }
         })
         artistDetailModel.artistLiveData.observe(this, Observer {

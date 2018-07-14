@@ -106,6 +106,24 @@
             bind:playerViewModel="@{playerViewModel}"
             android:id="@+id/play_list_layout" />
 
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/alpha_50"
+            android:visibility="@{playerViewModel.progressBarLayoutVisibility}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ProgressBar
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/green_light" />
+
+        </FrameLayout>
+
         <android.support.constraint.Guideline
             android:id="@+id/guideline_60dp"
             android:layout_width="wrap_content"

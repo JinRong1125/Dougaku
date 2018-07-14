@@ -8,18 +8,27 @@ import shinei.com.dougaku.model.*
 
 interface DougakuService {
     companion object {
-        const val BASE_URL = "https://dougaku.herokuapp.com/"
-//        const val BASE_URL = "http://192.168.1.105:8080/"
+//        const val BASE_URL = "https://dougaku.herokuapp.com/"
+        const val BASE_URL = "http://192.168.1.105:8080/"
     }
 
     @POST("api/albums")
     fun loadAlbums(@Body body: RequestObject): Observable<List<Album>>
 
+    @POST("api/albums")
+    fun loadAlbums(@Body body: AlbumId): Observable<List<Album>>
+
     @POST("api/producers")
     fun loadProducers(@Body body: RequestObject): Observable<List<Producer>>
 
+    @POST("api/producers")
+    fun loadProducers(@Body body: ProducerId): Observable<List<Producer>>
+
     @POST("api/artists")
     fun loadArtists(@Body body: RequestObject): Observable<List<Artist>>
+
+    @POST("api/artists")
+    fun loadArtists(@Body body: ArtistName): Observable<List<Artist>>
 
     @Headers("Content-Type: application/json")
     @POST("api/album/songs")
