@@ -31,13 +31,13 @@
             android:layout_height="60dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/drawable_toolbar_track"/>
+            android:background="@drawable/drawable_toolbar_top"/>
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/shadow_layout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/drawable_album_track"
+            android:background="@drawable/drawable_shadow_bottom"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@+id/album_image_view">
@@ -64,7 +64,8 @@
                 android:layout_marginEnd="20dp"
                 android:layout_marginBottom="10dp"
                 android:maxLines="1"
-                android:ellipsize="end"                android:textSize="20sp"
+                android:ellipsize="end"
+                android:textSize="20sp"
                 android:textColor="@android:color/white"
                 android:text="@{albumDetailModel.albumLiveData.producer}"
                 app:layout_constraintStart_toStartOf="@+id/shadow_layout"
