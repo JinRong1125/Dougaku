@@ -1,5 +1,6 @@
 package shinei.com.dougaku.service
 
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
@@ -318,8 +319,16 @@ class PlayerService: Service() {
                 .addAction(createAction(NEXT_TRACK, R.drawable.icon_next_24dp))
                 .setStyle(style)
                 .setOngoing(playBackState == PlaybackStateCompat.STATE_PLAYING)
-                .build()
-        notificationManager?.notify(PLAYER_NOTIFICATION_ID, notification)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(PLAYER_NOTIFICATION_CHANNEL_ID, PLAYER_NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)
+            notificationChannel.enableVibration(false)
+            notificationChannel.enableLights(false)
+            notificationManager?.createNotificationChannel(notificationChannel)
+            notificationManager?.notify(PLAYER_NOTIFICATION_ID, notification.setChannelId(PLAYER_NOTIFICATION_CHANNEL_ID).build())
+        }
+        else
+            notificationManager?.notify(PLAYER_NOTIFICATION_ID, notification.build())
     }
 
     fun createAction(action: String, drawable: Int): NotificationCompat.Action {

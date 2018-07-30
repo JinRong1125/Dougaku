@@ -19,6 +19,7 @@ const val PREVIOUS_TRACK = "PREVIOUS_TRACK"
 val INTENT_REQUEST_ID = 101
 val PLAYER_NOTIFICATION_ID = 1001
 val PLAYER_NOTIFICATION_CHANNEL_ID = "player_notification_channel_id"
+val PLAYER_NOTIFICATION_CHANNEL_NAME = "player_notification_channel_name"
 
 enum class PlayMode {
     NORMAL, SHUFFLE, REPEAT, LOOP, SHUFFLE_REPEAT
