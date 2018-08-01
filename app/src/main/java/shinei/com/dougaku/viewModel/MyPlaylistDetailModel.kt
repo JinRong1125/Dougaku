@@ -24,6 +24,7 @@ import shinei.com.dougaku.view.fragment.AlbumDetailFragment
 import shinei.com.dougaku.view.fragment.ArtistDetailFragment
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class MyPlaylistDetailModel @Inject constructor(val application: Application,
                                                 val dougakuRepository: DougakuRepository,
@@ -89,7 +90,49 @@ class MyPlaylistDetailModel @Inject constructor(val application: Application,
     }
 
     fun trackPopupMenu(view: View, sharedViewModel: SharedViewModel, song: Song) {
-        Utils.createTrackPopupMenu(view, compositeDisposable, dougakuRepository, likedTracksDao, myPlaylistsDao, sharedViewModel, song, refreshing)
+        val context = view.context
+        val popupMenu = PopupMenu(context, view)
+        var likedTrack = false
+        var likedTrackId = 0
+
+        popupMenu.menu.add(0, 1, 1, context.getString(R.string.menu_remove_from_playlist))
+        popupMenu.menu.add(0, 2, 2, context.getString(R.string.menu_go_to_album))
+        popupMenu.menu.add(0, 3, 3, context.getString(R.string.menu_go_to_artist))
+        compositeDisposable.add(likedTracksDao.getLikedTrack(song.songId)
+                .compose(RxSchedulersHelper.singleIoToMain())
+                .subscribe({
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_unlike_track))
+                    likedTrack = true
+                    likedTrackId = it.id
+                    popupMenu.show()
+                }, {
+                    popupMenu.menu.add(0, 0, 0, context.getString(R.string.menu_like_track))
+                    popupMenu.show()
+                }))
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                0 -> {
+                    if (!likedTrack)
+                        Utils.insertLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, song)
+                    else
+                        Utils.deleteLikedTracks(context, compositeDisposable, likedTracksDao, sharedViewModel, likedTrackId, song)
+                }
+                1 -> {
+                    val songsList = ArrayList(songsLiveData.value!!)
+                    songsList.remove(song)
+                    Utils.removeFromMyPlaylists(context, compositeDisposable, myPlaylistsDao, sharedViewModel, playlistLiveData.value!!.playlistId, playlistLiveData.value!!.title, songsList)
+                }
+                2 ->
+                    Utils.goToAlbum(view, compositeDisposable, dougakuRepository, sharedViewModel, song.albumId, refreshing)
+                3 -> {
+                    if (song.artistList.size > 1)
+                        Utils.createArtistDialog(view, compositeDisposable, dougakuRepository, sharedViewModel, song.artistList, refreshing)
+                    else
+                        Utils.goToArtist(view, compositeDisposable, dougakuRepository, sharedViewModel, song.artistList[0], refreshing)
+                }
+            }
+            true
+        }
     }
 
     fun intentToPlayer(position: Int, sharedViewModel: SharedViewModel) {
