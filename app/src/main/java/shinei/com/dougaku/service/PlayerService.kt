@@ -89,8 +89,8 @@ class PlayerService: Service() {
                 else
                     requestPlay()
             }
-            PLAY -> exoPlayer?.playWhenReady = true
-            PAUSE -> exoPlayer?.playWhenReady = false
+            PLAY -> requestPlay()
+            PAUSE -> pause()
             STOP -> exoPlayer?.stop()
             SEEK -> exoPlayer?.seekTo(intent.getIntExtra(SEEK_TIME, 0).toLong())
             PREPARE_PAUSE -> isPreparePause = true
