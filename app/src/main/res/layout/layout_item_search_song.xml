@@ -64,6 +64,7 @@
             android:layout_marginEnd="15dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:background="@drawable/icon_option"
             android:onClick="@{(v) -> searchSongModel.trackPopupMenu(v, sharedViewModel, song)}"
             app:layout_constraintEnd_toEndOf="parent"

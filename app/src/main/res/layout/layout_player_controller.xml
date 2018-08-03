@@ -24,7 +24,9 @@
             android:layout_marginStart="10dp"
             android:textColor="@android:color/white"
             app:formatTime="@{playerViewModel.positionSeconds}"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/time_seek_bar"
+            app:layout_constraintBottom_toBottomOf="@+id/time_seek_bar" />
 
         <TextView
             android:id="@+id/end_time_text_view"
@@ -33,12 +35,16 @@
             android:layout_marginEnd="10dp"
             android:textColor="@android:color/white"
             app:formatTime="@{playerViewModel.durationSeconds}"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/time_seek_bar"
+            app:layout_constraintBottom_toBottomOf="@+id/time_seek_bar" />
 
         <SeekBar
             android:id="@+id/time_seek_bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:maxHeight="40dp"
             android:thumbTint="@color/green_light"
             android:progressTint="@color/green_light"
             android:progressBackgroundTint="@android:color/white"
@@ -55,6 +61,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginEnd="60dp"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:background="@{playerViewModel.heartDrawable}"
             android:onClick="@{(v) -> playerViewModel.like(v, sharedViewModel)}"
             app:layout_constraintEnd_toEndOf="@+id/shuffle_image_button"
@@ -66,6 +73,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginEnd="80dp"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:background="@{playerViewModel.shuffleDrawable}"
             android:onClick="@{() -> playerViewModel.shuffle()}"
             app:layout_constraintEnd_toEndOf="@+id/play_pause_image_button"
@@ -77,6 +85,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="20dp"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:background="@{playerViewModel.playpauseDrawable}"
             android:onClick="@{() -> playerViewModel.playpause()}"
             app:layout_constraintStart_toStartOf="parent"
@@ -88,6 +97,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginStart="80dp"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:background="@{playerViewModel.repeatDrawable}"
             android:onClick="@{() -> playerViewModel.repeat()}"
             app:layout_constraintStart_toStartOf="@+id/play_pause_image_button"
@@ -99,6 +109,7 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginStart="60dp"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:background="@drawable/icon_playlist"
             android:onClick="@{() -> playerViewModel.openclosePlayList(true)}"
             app:layout_constraintStart_toStartOf="@+id/repeat_image_button"
