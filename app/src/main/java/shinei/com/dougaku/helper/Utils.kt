@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.databinding.BindingAdapter
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
 import android.transition.Fade
@@ -51,6 +53,7 @@ object Utils{
     fun blurImage(imageView: ImageView, url: String?) {
         Glide.with(imageView)
                 .load(url)
+                .apply(RequestOptions().placeholder(ColorDrawable(ContextCompat.getColor(imageView.context, R.color.alpha_80))))
                 .apply(bitmapTransform(MultiTransformation(
                         BlurTransformation(25, 10),
                         ColorFilterTransformation(Color.argb(102, 0, 0, 0)))))
