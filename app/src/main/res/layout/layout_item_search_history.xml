@@ -46,7 +46,7 @@
 
         <ImageButton
             android:id="@+id/input_image_button"
-            android:background="@drawable/icon_left_up"
+            android:src="@drawable/icon_left_up"
             android:onClick="@{() -> searchViewModel.inputKeyword(keyword)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

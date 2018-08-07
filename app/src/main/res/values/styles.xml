@@ -30,10 +30,13 @@
     </style>
 
     <style name="image_button">
-        <item name="android:layout_width">20dp</item>
-        <item name="android:layout_height">20dp</item>
-        <item name="android:layout_margin">20dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:scaleType">fitCenter</item>
         <item name="android:foreground">?selectableItemBackgroundBorderless</item>
+        <item name="android:background">@android:color/transparent</item>
     </style>
 
     <style name="item_main_title">

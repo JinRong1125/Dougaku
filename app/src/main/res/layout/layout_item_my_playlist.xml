@@ -51,7 +51,7 @@
 
         <ImageButton
             android:id="@+id/option_image_button"
-            android:background="@drawable/icon_option"
+            android:src="@drawable/icon_option"
             android:onClick="@{(v) -> myPlaylistsModel.playlistPopupMenu(v, sharedViewModel, myPlaylist)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

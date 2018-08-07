@@ -57,11 +57,13 @@
 
         <ImageButton
             android:id="@+id/play_pause_image_button"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="15dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:padding="15dp"
+            android:scaleType="fitCenter"
             android:foreground="?selectableItemBackgroundBorderless"
-            android:background="@{playerViewModel.buttomPlaypauseDrawable}"
+            android:background="@android:color/transparent"
+            android:src="@{playerViewModel.buttomPlaypauseDrawable}"
             android:onClick="@{() -> playerViewModel.playpause()}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

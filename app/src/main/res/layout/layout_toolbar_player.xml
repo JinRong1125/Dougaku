@@ -20,7 +20,7 @@
 
         <ImageButton
             android:id="@+id/hide_image_button"
-            android:background="@drawable/icon_hide"
+            android:src="@drawable/icon_hide"
             android:onClick="@{() -> playerViewModel.hide()}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +29,7 @@
 
         <ImageButton
             android:id="@+id/option_image_button"
-            android:background="@drawable/icon_option"
+            android:src="@drawable/icon_option"
             android:onClick="@{(v) -> playerViewModel.optionPopupMenu(v, sharedViewModel)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

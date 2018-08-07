@@ -16,7 +16,7 @@
 
         <ImageButton
             android:id="@+id/back_image_button"
-            android:background="@drawable/icon_back"
+            android:src="@drawable/icon_back"
             android:onClick="@{(v) -> searchViewModel.onBackPressed(v)}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
