@@ -225,8 +225,6 @@ class PlayerViewModel @Inject constructor(val application: Application,
         }
         previousTrack = targetTrack
         currentTrack.postValue(targetTrack)
-        positionSeconds.postValue(0)
-        durationSeconds.postValue(0)
     }
 
     fun delayLoadTrack(targetSong: Song) {
