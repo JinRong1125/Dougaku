@@ -1,7 +1,5 @@
 package shinei.com.dougaku.model
 
-import android.os.Parcel
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 
 data class Song(
@@ -15,46 +13,4 @@ data class Song(
         @SerializedName("url_cover") val coverUrl: String,
         @SerializedName("artist") val artist: String,
         @SerializedName("genre") val genre: String,
-        @SerializedName("artist_list") val artistList: List<String>): Parcelable {
-
-    constructor(parcel: Parcel) : this(
-            parcel.readInt(),
-            parcel.readInt(),
-            parcel.readInt(),
-            parcel.readInt(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.readString(),
-            parcel.createStringArrayList())
-
-    override fun writeToParcel(dest: Parcel, flags: Int) {
-        dest.writeInt(songId)
-        dest.writeInt(disc)
-        dest.writeInt(track)
-        dest.writeInt(albumId)
-        dest.writeString(title)
-        dest.writeString(streamUrl)
-        dest.writeString(album)
-        dest.writeString(coverUrl)
-        dest.writeString(artist)
-        dest.writeString(genre)
-        dest.writeStringList(artistList)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Song> {
-        override fun createFromParcel(parcel: Parcel): Song {
-            return Song(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Song?> {
-            return arrayOfNulls(size)
-        }
-    }
-}
+        @SerializedName("artist_list") val artistList: List<String>)

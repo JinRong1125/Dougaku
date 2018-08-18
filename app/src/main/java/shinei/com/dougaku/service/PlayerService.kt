@@ -1,9 +1,6 @@
 package shinei.com.dougaku.service
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -14,15 +11,17 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
 import android.net.Uri
-import android.os.Binder
-import android.os.Build
-import android.os.IBinder
+import android.os.*
 import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaBrowserServiceCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.text.TextUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
@@ -36,24 +35,20 @@ import io.reactivex.disposables.Disposable
 import shinei.com.dougaku.App
 import shinei.com.dougaku.R
 import shinei.com.dougaku.helper.*
-import shinei.com.dougaku.model.Song
 import shinei.com.dougaku.view.activity.MainActivity
 import java.util.concurrent.TimeUnit
 
-class PlayerService: Service() {
+class PlayerService: MediaBrowserServiceCompat() {
 
-    var playerListener: PlayerListener? = null
     var exoPlayer: ExoPlayer? = null
     var audioManager: AudioManager? = null
     var mediaSessionCompat: MediaSessionCompat? = null
-    var notificationManager: NotificationManager? = null
     var progressDisposable: Disposable? = null
+    var notificationManager: NotificationManager? = null
     var connectivityManager: ConnectivityManager? = null
     var networkCallback: NetworkCallback? = null
 
     val focusLock = Any()
-    var currentSong: Song? = null
-    var albumBitmap: Bitmap? = null
     var isReady = false
     var isError = false
     var isPreparePause = false
@@ -67,47 +62,22 @@ class PlayerService: Service() {
 
     override fun onTaskRemoved(rootIntent: Intent) {
         super.onTaskRemoved(rootIntent)
-        exoPlayer?.stop()
-        exoPlayer?.release()
-        exoPlayer = null
-        notificationManager?.cancel(PLAYER_NOTIFICATION_ID)
-        connectivityManager!!.unregisterNetworkCallback(networkCallback)
+        finishService()
     }
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        when (intent.action) {
-            PREPARE_TRACK -> {
-                isReady = false
-                currentSong = intent.getParcelableExtra(TARGET_SONG)
-                createNotification(exoPlayer!!.playWhenReady)
-                exoPlayer?.prepare(ExtractorMediaSource.Factory((application as App).defaultDataSourceFactory)
-                        .createMediaSource(Uri.parse(currentSong?.streamUrl)))
-            }
-            PLAY_PAUSE -> {
-                if (exoPlayer!!.playWhenReady)
-                    pause()
-                else
-                    requestPlay()
-            }
-            PLAY -> requestPlay()
-            PAUSE -> pause()
-            STOP -> exoPlayer?.stop()
-            SEEK -> exoPlayer?.seekTo(intent.getIntExtra(SEEK_TIME, 0).toLong())
-            PREPARE_PAUSE -> isPreparePause = true
-            NEXT_TRACK -> playerListener?.onNextTrack()
-            PREVIOUS_TRACK -> playerListener?.onPreviousTrack()
-        }
-        return START_NOT_STICKY
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        MediaButtonReceiver.handleIntent(mediaSessionCompat, intent)
+        return super.onStartCommand(intent, flags, startId)
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        return PlayerBinder()
+    override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
+        result.sendResult(null)
     }
 
-    inner class PlayerBinder: Binder() {
-        fun getService(): PlayerService {
-            return this@PlayerService
-        }
+    override fun onGetRoot(clientPackageName: String, clientUid: Int, rootHints: Bundle?): BrowserRoot? {
+        return if (TextUtils.equals(clientPackageName, packageName)) {
+            MediaBrowserServiceCompat.BrowserRoot(getString(R.string.app_name), null)
+        } else null
     }
 
     val onAudioFocusChangeListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
@@ -159,18 +129,20 @@ class PlayerService: Service() {
 
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             if (playWhenReady) {
-                playerListener?.onPlay()
-                updateNotification(PlaybackStateCompat.STATE_PLAYING)
+                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer!!.currentPosition)
+                updateNotification()
                 if (progressDisposable == null)
                     progressDisposable = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
-                            .subscribe{ playerListener?.onProgressUpdated(exoPlayer!!.currentPosition.toInt()) }
+                            .subscribe{
+                                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer!!.currentPosition)
+                            }
             }
             else {
-                if (isNotificationActivated())
-                    updateNotification(PlaybackStateCompat.STATE_PAUSED)
-                playerListener?.onPause()
                 progressDisposable?.dispose()
                 progressDisposable = null
+                setPlaybackState(PlaybackStateCompat.STATE_PAUSED, exoPlayer!!.currentPosition)
+                if (isNotificationActivated())
+                    updateNotification()
             }
             when (playbackState) {
                 Player.STATE_IDLE -> {
@@ -178,46 +150,99 @@ class PlayerService: Service() {
                 Player.STATE_READY -> {
                     if (!isReady) {
                         isReady = true
-                        playerListener?.onReady(exoPlayer!!.duration.toInt())
+                        setPlaybackState(PlaybackStateCompat.STATE_CONNECTING, exoPlayer!!.duration)
                         if (isPreparePause){
                             isPreparePause = false
                             pause()
                         }
                     }
                 }
-                Player.STATE_BUFFERING ->
-                    playerListener?.onBuffering()
-                Player.STATE_ENDED ->
-                    playerListener?.onEnded()
+                Player.STATE_BUFFERING -> {
+                    setPlaybackState(PlaybackStateCompat.STATE_BUFFERING, exoPlayer!!.currentPosition)
+                }
+                Player.STATE_ENDED -> {
+                    setPlaybackState(PlaybackStateCompat.STATE_NONE, 0)
+                }
             }
         }
     }
 
-    interface PlayerListener {
-        fun onPlay()
-        fun onPause()
-        fun onBuffering()
-        fun onReady(duration: Int)
-        fun onEnded()
-        fun onProgressUpdated(position: Int)
-        fun onNextTrack()
-        fun onPreviousTrack()
-    }
-
-    fun setPlayerListner(playerListener: PlayerListener) {
-        this.playerListener = playerListener
-    }
-
     fun initialService() {
+        application.startService(Intent(application, PlayerService::class.java))
+
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        mediaSessionCompat = MediaSessionCompat(this, resources.getString(R.string.app_name))
-        mediaSessionCompat?.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS or MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         exoPlayer = ExoPlayerFactory.newSimpleInstance(application, DefaultTrackSelector())
         exoPlayer?.addListener(eventListener)
         networkCallback = NetworkCallback()
         connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager?.registerNetworkCallback(NetworkRequest.Builder().build(), networkCallback)
+
+        mediaSessionCompat = MediaSessionCompat(applicationContext, resources.getString(R.string.app_name))
+        mediaSessionCompat?.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+        mediaSessionCompat?.setCallback(mediaSessionCallback)
+        mediaSessionCompat?.isActive = true
+        sessionToken = mediaSessionCompat?.sessionToken
+    }
+
+    fun finishService() {
+        stop()
+        stopForeground(true)
+    }
+
+    val mediaSessionCallback = object : MediaSessionCompat.Callback() {
+
+        override fun onPlayFromUri(uri: Uri, extras: Bundle) {
+            super.onPlayFromUri(uri, extras)
+            isReady = false
+            createNotification(exoPlayer!!.playWhenReady, extras)
+            exoPlayer?.prepare(ExtractorMediaSource.Factory((application as App).defaultDataSourceFactory)
+                    .createMediaSource(uri))
+        }
+
+        override fun onPlay() {
+            super.onPlay()
+            requestPlay()
+        }
+
+        override fun onPause() {
+            super.onPause()
+            pause()
+        }
+
+        override fun onStop() {
+            super.onStop()
+            stop()
+        }
+
+        override fun onSeekTo(pos: Long) {
+            super.onSeekTo(pos)
+            exoPlayer?.seekTo(pos)
+        }
+
+        override fun onSkipToPrevious() {
+            super.onSkipToPrevious()
+            setPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS, 0)
+        }
+
+        override fun onSkipToNext() {
+            super.onSkipToNext()
+            setPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, 0)
+        }
+
+        override fun onCustomAction(action: String, extras: Bundle) {
+            super.onCustomAction(action, extras)
+            when (action) {
+                PLAY_PAUSE -> {
+                    if (!exoPlayer!!.playWhenReady)
+                        requestPlay()
+                    else
+                        pause()
+                }
+                PREPARE_PAUSE ->
+                    isPreparePause = true
+            }
+        }
     }
 
     inner class NetworkCallback: ConnectivityManager.NetworkCallback() {
@@ -227,7 +252,7 @@ class PlayerService: Service() {
                 isError = false
                 val position = exoPlayer?.currentPosition
                 exoPlayer?.prepare(ExtractorMediaSource.Factory((application as App).defaultDataSourceFactory)
-                        .createMediaSource(Uri.parse(currentSong?.streamUrl)))
+                        .createMediaSource(mediaSessionCompat!!.controller.metadata.description.mediaUri))
                 exoPlayer?.seekTo(position!!)
             }
         }
@@ -279,62 +304,103 @@ class PlayerService: Service() {
         exoPlayer?.playWhenReady = false
     }
 
-    fun createNotification(playWhenReady: Boolean) {
+    fun stop() {
+        exoPlayer?.stop()
+    }
+
+    fun createNotification(playWhenReady: Boolean, bundle: Bundle) {
         Glide.with(this)
                 .asBitmap()
-                .load(currentSong!!.coverUrl)
+                .load(bundle.getString(TARGET_COVER_URL))
                 .into(object : SimpleTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        albumBitmap = resource
                         val mediaMetadataCompat = MediaMetadataCompat.Builder()
                         mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, resource)
                         mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, resource)
+                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, bundle.getString(TARGET_TITLE))
+                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, bundle.getString(TARGET_ALBUM))
+                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, bundle.getString(TARGET_STREAM_URL))
                         mediaSessionCompat?.setMetadata(mediaMetadataCompat.build())
                         if (isNotificationActivated() or playWhenReady)
-                            updateNotification(PlaybackStateCompat.STATE_CONNECTING)
+                            updateNotification()
                     }
                 })
     }
 
-    fun updateNotification(playBackState: Int) {
-        mediaSessionCompat?.setPlaybackState(PlaybackStateCompat.Builder()
-                .setState(playBackState, 0, 1.0f).build())
-        val applicationIntent = PendingIntent.getActivity(
-                this, INTENT_REQUEST_ID, Intent(this, MainActivity::class.java), 0)
-        val playpauseDrawable = if (playBackState != PlaybackStateCompat.STATE_PLAYING)
-            R.drawable.icon_play_24dp else R.drawable.icon_pause_24dp
-        val style = android.support.v4.media.app.NotificationCompat.MediaStyle()
-                .setMediaSession(mediaSessionCompat?.sessionToken)
-                .setShowActionsInCompactView(0, 1, 2, 3)
-        val notification = NotificationCompat.Builder(applicationContext, PLAYER_NOTIFICATION_CHANNEL_ID)
-                .setColor(ContextCompat.getColor(applicationContext, R.color.green_half))
-                .setSmallIcon(R.drawable.icon_app_24dp)
-                .setLargeIcon(albumBitmap)
-                .setContentIntent(applicationIntent)
-                .setContentTitle(currentSong?.title)
-                .setContentText(currentSong?.artist)
-                .setWhen(0)
-                .addAction(createAction(PREVIOUS_TRACK, R.drawable.icon_previous_24dp))
-                .addAction(createAction(PLAY_PAUSE, playpauseDrawable))
-                .addAction(createAction(NEXT_TRACK, R.drawable.icon_next_24dp))
-                .setStyle(style)
-                .setOngoing(playBackState == PlaybackStateCompat.STATE_PLAYING)
+    fun setPlaybackState(playbackState: Int, position: Long) {
+        val playbackStateBuilder = PlaybackStateCompat.Builder()
+        playbackStateBuilder.setActions(
+                PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                        PlaybackStateCompat.ACTION_PLAY or
+                        PlaybackStateCompat.ACTION_PAUSE or
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        playbackStateBuilder.setState(playbackState, position, 0f)
+        mediaSessionCompat?.setPlaybackState(playbackStateBuilder.build())
+    }
+
+    fun updateNotification() {
+        val controller = mediaSessionCompat!!.controller
+        if (controller.metadata != null) {
+            val description = controller.metadata.description
+            val playBackState = controller.playbackState.state
+            val applicationIntent = PendingIntent.getActivity(
+                    this, INTENT_REQUEST_ID, Intent(this, MainActivity::class.java), 0)
+            val style = android.support.v4.media.app.NotificationCompat.MediaStyle()
+                    .setMediaSession(mediaSessionCompat?.sessionToken)
+                    .setShowActionsInCompactView(0, 1, 2)
+            val notification = NotificationCompat.Builder(applicationContext, PLAYER_NOTIFICATION_CHANNEL_ID)
+                    .setColor(ContextCompat.getColor(applicationContext, R.color.green_half))
+                    .setSmallIcon(R.drawable.icon_app_24dp)
+                    .setLargeIcon(description.iconBitmap)
+                    .setContentIntent(applicationIntent)
+                    .setContentTitle(description.title)
+                    .setContentText(description.subtitle)
+                    .setWhen(0)
+                    .setStyle(style)
+            if (playBackState == PlaybackStateCompat.STATE_PLAYING)
+                playingNotification(notification)
+            else
+                pausedNotification(notification)
+        }
+    }
+
+    fun playingNotification(notification: NotificationCompat.Builder) {
+        notification
+                .addAction(createAction(R.drawable.icon_previous_24dp, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+                .addAction(createAction(R.drawable.icon_pause_24dp, PlaybackStateCompat.ACTION_PAUSE))
+                .addAction(createAction(R.drawable.icon_next_24dp, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                .setOngoing(true)
+        notifyNotification(notification)
+    }
+
+    fun pausedNotification(notification: NotificationCompat.Builder) {
+        notification
+                .addAction(createAction(R.drawable.icon_previous_24dp, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS))
+                .addAction(createAction(R.drawable.icon_play_24dp, PlaybackStateCompat.ACTION_PLAY))
+                .addAction(createAction(R.drawable.icon_next_24dp, PlaybackStateCompat.ACTION_SKIP_TO_NEXT))
+                .setOngoing(false)
+        notifyNotification(notification)
+    }
+
+    fun createAction(resourceId: Int, playbackState: Long): NotificationCompat.Action {
+        return NotificationCompat.Action(resourceId, "",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(this, playbackState))
+    }
+
+    fun notifyNotification(notification: NotificationCompat.Builder) {
+        val buildNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(PLAYER_NOTIFICATION_CHANNEL_ID, PLAYER_NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)
             notificationChannel.enableVibration(false)
             notificationChannel.enableLights(false)
             notificationManager?.createNotificationChannel(notificationChannel)
-            notificationManager?.notify(PLAYER_NOTIFICATION_ID, notification.setChannelId(PLAYER_NOTIFICATION_CHANNEL_ID).build())
+            notification.setChannelId(PLAYER_NOTIFICATION_CHANNEL_ID).build()
         }
         else
-            notificationManager?.notify(PLAYER_NOTIFICATION_ID, notification.build())
-    }
-
-    fun createAction(action: String, drawable: Int): NotificationCompat.Action {
-        val intent = Intent(this, this::class.java).apply { this.action = action }
-        return NotificationCompat.Action.Builder(drawable, "",
-                PendingIntent.getService(this, 0, intent, 0)).build()
+            notification.build()
+        startForeground(PLAYER_NOTIFICATION_ID, buildNotification)
+        notificationManager?.notify(PLAYER_NOTIFICATION_ID, buildNotification)
     }
 
     fun isNotificationActivated(): Boolean {

@@ -5,11 +5,14 @@ import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import android.content.*
 import android.graphics.drawable.Drawable
-import android.os.IBinder
+import android.net.Uri
+import android.os.Bundle
+import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
-import android.util.Log
 import android.view.View
 import android.widget.SeekBar
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
@@ -32,14 +35,20 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class PlayerViewModel @Inject constructor(val application: Application,
-                                          val dougakuRepository: DougakuRepository,
-                                          val likedTracksDao: LikedTracksDao,
-                                          val myPlaylistsDao: MyPlaylistsDao,
-                                          val historyTracksDao: HistoryTracksDao,
-                                          val settingsDao: SettingsDao): ViewModel() {
+                                               val dougakuRepository: DougakuRepository,
+                                               val likedTracksDao: LikedTracksDao,
+                                               val myPlaylistsDao: MyPlaylistsDao,
+                                               val historyTracksDao: HistoryTracksDao,
+                                               val settingsDao: SettingsDao): ViewModel() {
 
     val compositeDisposable = CompositeDisposable()
     var disposable: Disposable? = null
+    var mediaControllerCompat: MediaControllerCompat? = null
+
+    val mediaBrowserCompat: MediaBrowserCompat by lazy {
+        MediaBrowserCompat(application, ComponentName(application, PlayerService::class.java),
+                mediaBrowserConnectionCallback, null)
+    }
 
     val settingsLiveData = MutableLiveData<Settings>()
     val songsLiveData = MutableLiveData<List<Song>>()
@@ -141,59 +150,53 @@ class PlayerViewModel @Inject constructor(val application: Application,
         }
     }
 
-    val playerServiceConnection = object: ServiceConnection {
-        override fun onServiceConnected(componetName: ComponentName, service: IBinder) {
-            val playerService = (service as PlayerService.PlayerBinder).getService()
-            playerService.setPlayerListner(playerListener)
-        }
+    val mediaBrowserConnectionCallback = object : MediaBrowserCompat.ConnectionCallback() {
 
-        override fun onServiceDisconnected(className: ComponentName) {
-
+        override fun onConnected() {
+            super.onConnected()
+            mediaControllerCompat = MediaControllerCompat(application, mediaBrowserCompat.sessionToken)
+            mediaControllerCompat?.registerCallback(mediaControllerCallback)
+            getSettings()
         }
     }
 
-    val playerListener = object: PlayerService.PlayerListener {
-        override fun onPlay() {
-            playpauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_pause))
-            buttomPlaypauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_pause))
-        }
+    val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
-        override fun onPause() {
-            playpauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_play))
-            buttomPlaypauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_play))
-        }
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+            super.onPlaybackStateChanged(state)
+            when (state?.state) {
+                PlaybackStateCompat.STATE_CONNECTING ->
+                    durationSeconds.postValue(state.position.toInt())
+                PlaybackStateCompat.STATE_PLAYING -> {
+                    playpauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_pause))
+                    buttomPlaypauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_pause))
+                    if (!isSeeking)
+                        positionSeconds.postValue(state.position.toInt())
+                }
+                PlaybackStateCompat.STATE_PAUSED -> {
+                    playpauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_play))
+                    buttomPlaypauseDrawable.postValue(Utils.getDrawable(application, R.drawable.icon_play))
+                    if (!isSeeking)
+                        positionSeconds.postValue(state.position.toInt())
+                }
+                PlaybackStateCompat.STATE_NONE -> {
+                    executePlayMode()
+                }
+                PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS -> {
+                    if (currentTrack.value!! > 0)
+                        prepareTrack(currentTrack.value!! - 1)
 
-        override fun onBuffering() {}
-
-        override fun onReady(duration: Int) {
-            durationSeconds.postValue(duration)
-        }
-
-        override fun onEnded() {
-            executePlayMode()
-        }
-
-        override fun onProgressUpdated(position: Int) {
-            if (!isSeeking) {
-                positionSeconds.postValue(position)
+                }
+                PlaybackStateCompat.STATE_SKIPPING_TO_NEXT -> {
+                    if (currentTrack.value!! < songsLiveData.value!!.size - 1)
+                        prepareTrack(currentTrack.value!! + 1)
+                }
             }
-        }
-
-        override fun onNextTrack() {
-            if (currentTrack.value!! < songsLiveData.value!!.size - 1)
-                prepareTrack(currentTrack.value!! + 1)
-
-        }
-
-        override fun onPreviousTrack() {
-            if (currentTrack.value!! > 0)
-                prepareTrack(currentTrack.value!! - 1)
         }
     }
 
     fun initialService() {
-        application.bindService(Intent(application, PlayerService::class.java),
-                playerServiceConnection, Context.BIND_AUTO_CREATE)
+        mediaBrowserCompat.connect()
     }
 
     fun getSettings() {
@@ -225,34 +228,28 @@ class PlayerViewModel @Inject constructor(val application: Application,
         }
         previousTrack = targetTrack
         currentTrack.postValue(targetTrack)
+        positionSeconds.postValue(0)
+        durationSeconds.postValue(0)
     }
 
     fun delayLoadTrack(targetSong: Song) {
-        Intent(application, PlayerService::class.java).apply {
-            action = STOP
-            application.startService(this)
-        }
+        mediaControllerCompat!!.transportControls.stop()
         disposable?.dispose()
         disposable = Observable.timer(1000, TimeUnit.MILLISECONDS).subscribe({
             if (!haveSettings) {
-                Intent(application, PlayerService::class.java).apply {
-                    action = PLAY
-                    application.startService(this)
-                }
+                mediaControllerCompat!!.transportControls.play()
             }
             else {
                 haveSettings = false
                 playModel.postValue(settingsLiveData.value?.playMode)
-                Intent(application, PlayerService::class.java).apply {
-                    action = PAUSE
-                    application.startService(this)
-                }
+                mediaControllerCompat!!.transportControls.pause()
             }
-            Intent(application, PlayerService::class.java).apply {
-                action = PREPARE_TRACK
-                putExtra(TARGET_SONG, targetSong)
-                application.startService(this)
-            }
+            val bundle = Bundle()
+            bundle.putString(TARGET_TITLE, targetSong.title)
+            bundle.putString(TARGET_ALBUM, targetSong.album)
+            bundle.putString(TARGET_COVER_URL, targetSong.coverUrl)
+            bundle.putString(TARGET_STREAM_URL, targetSong.streamUrl)
+            mediaControllerCompat!!.transportControls.playFromUri(Uri.parse(targetSong.streamUrl), bundle)
             if (playModel.value == PlayMode.SHUFFLE && !isShuffling)
                 createShuffleList()
             else
@@ -433,17 +430,11 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun playpause(){
-        Intent(application, PlayerService::class.java).apply {
-            action = PLAY_PAUSE
-            application.startService(this)
-        }
+        mediaControllerCompat!!.transportControls.sendCustomAction(PLAY_PAUSE, null)
     }
 
     fun preparePause() {
-        Intent(application, PlayerService::class.java).apply {
-            action = PREPARE_PAUSE
-            application.startService(this)
-        }
+        mediaControllerCompat!!.transportControls.sendCustomAction(PREPARE_PAUSE, null)
     }
 
     fun repeat() {
@@ -496,7 +487,6 @@ class PlayerViewModel @Inject constructor(val application: Application,
                 else {
                     preparePause()
                     prepareTrack(0)
-                    positionSeconds.postValue(0)
                 }
             }
             PlayMode.SHUFFLE -> {
@@ -508,7 +498,6 @@ class PlayerViewModel @Inject constructor(val application: Application,
                 else {
                     preparePause()
                     prepareTrack(firstTrack)
-                    positionSeconds.postValue(0)
                     currentShuffle = 0
                 }
             }
@@ -549,11 +538,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun seek(position: Int) {
-        Intent(application, PlayerService::class.java).apply {
-            action = SEEK
-            putExtra(SEEK_TIME, position)
-            application.startService(this)
-        }
+        mediaControllerCompat!!.transportControls.seekTo(position.toLong())
     }
 
     fun startTracking() {

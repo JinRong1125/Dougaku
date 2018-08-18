@@ -31,15 +31,15 @@
         <service
             android:name=".service.PlayerService">
             <intent-filter>
-                <action android:name="shinei.com.dougaku.action.PREPARE_TRACK"/>
-                <action android:name="shinei.com.dougaku.action.PLAY_PAUSE"/>
-                <action android:name="shinei.com.dougaku.action.PLAY"/>
-                <action android:name="shinei.com.dougaku.action.PAUSE"/>
-                <action android:name="shinei.com.dougaku.action.STOP"/>
-                <action android:name="shinei.com.dougaku.action.SEEK"/>
-                <action android:name="shinei.com.dougaku.action.PREPARE_PAUSE"/>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </service>
+
+        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

@@ -2,19 +2,13 @@ package shinei.com.dougaku.helper
 
 const val PLAYER_ACTION = "shinei.com.dougaku.action."
 
-const val TARGET_SONG = "TARGET_SONG"
+const val TARGET_TITLE = "TARGET_TITLE"
+const val TARGET_ALBUM = "TARGET_ALBUM"
+const val TARGET_COVER_URL = "TARGET_COVER_URL"
+const val TARGET_STREAM_URL = "TARGET_STREAM_URL"
 
-const val PREPARE_TRACK = PLAYER_ACTION + "PREPARE_TRACK"
 const val PLAY_PAUSE = PLAYER_ACTION + "PLAY_PAUSE"
-const val PLAY = PLAYER_ACTION + "PLAY"
-const val PAUSE = PLAYER_ACTION + "PAUSE"
-const val STOP = PLAYER_ACTION + "STOP"
-const val SEEK = PLAYER_ACTION + "SEEK"
 const val PREPARE_PAUSE = PLAYER_ACTION + "PREPARE_PAUSE"
-
-const val SEEK_TIME = "SEEK_TIME"
-const val NEXT_TRACK = "NEXT_TRACK"
-const val PREVIOUS_TRACK = "PREVIOUS_TRACK"
 
 val INTENT_REQUEST_ID = 101
 val PLAYER_NOTIFICATION_ID = 1001
