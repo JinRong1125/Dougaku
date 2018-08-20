@@ -39,6 +39,8 @@ class SearchFragment: FrameFragment() {
     override fun onDestroy() {
         super.onDestroy()
         sharedViewModel.enteredKeyword.postValue(null)
+        val searchViewPager = fragmentSearchBinding.searchViewPager
+        (searchViewPager.adapter as SearchPagerAdapter).destroyAllItems(searchViewPager, activity!!.supportFragmentManager)
     }
 
     @SuppressLint("RestrictedApi")

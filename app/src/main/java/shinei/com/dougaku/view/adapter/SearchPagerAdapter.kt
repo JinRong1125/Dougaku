@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.view.ViewPager
 import android.view.ViewGroup
 import shinei.com.dougaku.R
 import shinei.com.dougaku.view.fragment.SearchAlbumFragment
@@ -38,4 +39,12 @@ class SearchPagerAdapter(context: Context, fragmentManager: FragmentManager): Fr
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {}
+
+    fun destroyAllItems(viewPager: ViewPager, fragmentManager: FragmentManager) {
+        for (i in 0 until tabTitles.size) {
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.remove(this.instantiateItem(viewPager, i) as Fragment)
+            fragmentTransaction.commit()
+        }
+    }
 }
