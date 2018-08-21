@@ -60,8 +60,8 @@ class PlayerService: MediaBrowserServiceCompat() {
         initialService()
     }
 
-    override fun onTaskRemoved(rootIntent: Intent) {
-        super.onTaskRemoved(rootIntent)
+    override fun onDestroy() {
+        super.onDestroy()
         finishService()
     }
 
@@ -134,7 +134,7 @@ class PlayerService: MediaBrowserServiceCompat() {
                 if (progressDisposable == null)
                     progressDisposable = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
                             .subscribe{
-                                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer!!.currentPosition)
+                                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer?.currentPosition)
                             }
             }
             else {
@@ -157,9 +157,6 @@ class PlayerService: MediaBrowserServiceCompat() {
                         }
                     }
                 }
-                Player.STATE_BUFFERING -> {
-                    setPlaybackState(PlaybackStateCompat.STATE_BUFFERING, exoPlayer!!.currentPosition)
-                }
                 Player.STATE_ENDED -> {
                     setPlaybackState(PlaybackStateCompat.STATE_NONE, 0)
                 }
@@ -168,8 +165,6 @@ class PlayerService: MediaBrowserServiceCompat() {
     }
 
     fun initialService() {
-        application.startService(Intent(application, PlayerService::class.java))
-
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         exoPlayer = ExoPlayerFactory.newSimpleInstance(application, DefaultTrackSelector())
@@ -186,8 +181,12 @@ class PlayerService: MediaBrowserServiceCompat() {
     }
 
     fun finishService() {
-        stop()
+        exoPlayer?.release()
+        notificationManager?.cancel(PLAYER_NOTIFICATION_ID)
         stopForeground(true)
+        mediaSessionCompat?.release()
+        progressDisposable?.dispose()
+        connectivityManager?.unregisterNetworkCallback(networkCallback)
     }
 
     val mediaSessionCallback = object : MediaSessionCompat.Callback() {
@@ -195,7 +194,7 @@ class PlayerService: MediaBrowserServiceCompat() {
         override fun onPlayFromUri(uri: Uri, extras: Bundle) {
             super.onPlayFromUri(uri, extras)
             isReady = false
-            createNotification(exoPlayer!!.playWhenReady, extras)
+            createNotification(extras)
             exoPlayer?.prepare(ExtractorMediaSource.Factory((application as App).defaultDataSourceFactory)
                     .createMediaSource(uri))
         }
@@ -233,6 +232,10 @@ class PlayerService: MediaBrowserServiceCompat() {
         override fun onCustomAction(action: String, extras: Bundle) {
             super.onCustomAction(action, extras)
             when (action) {
+                UPDATE_METADATA -> {
+                    if (isNotificationActivated() or exoPlayer!!.playWhenReady)
+                        updateNotification()
+                }
                 PLAY_PAUSE -> {
                     if (!exoPlayer!!.playWhenReady)
                         requestPlay()
@@ -308,7 +311,7 @@ class PlayerService: MediaBrowserServiceCompat() {
         exoPlayer?.stop()
     }
 
-    fun createNotification(playWhenReady: Boolean, bundle: Bundle) {
+    fun createNotification(bundle: Bundle) {
         Glide.with(this)
                 .asBitmap()
                 .load(bundle.getString(TARGET_COVER_URL))
@@ -317,17 +320,16 @@ class PlayerService: MediaBrowserServiceCompat() {
                         val mediaMetadataCompat = MediaMetadataCompat.Builder()
                         mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, resource)
                         mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, resource)
+                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, bundle.getString(TARGET_ID))
                         mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, bundle.getString(TARGET_TITLE))
                         mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, bundle.getString(TARGET_ALBUM))
                         mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, bundle.getString(TARGET_STREAM_URL))
                         mediaSessionCompat?.setMetadata(mediaMetadataCompat.build())
-                        if (isNotificationActivated() or playWhenReady)
-                            updateNotification()
                     }
                 })
     }
 
-    fun setPlaybackState(playbackState: Int, position: Long) {
+    fun setPlaybackState(playbackState: Int, position: Long?) {
         val playbackStateBuilder = PlaybackStateCompat.Builder()
         playbackStateBuilder.setActions(
                 PlaybackStateCompat.ACTION_PLAY_PAUSE or
@@ -336,8 +338,10 @@ class PlayerService: MediaBrowserServiceCompat() {
                         PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
                         PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
 
-        playbackStateBuilder.setState(playbackState, position, 0f)
-        mediaSessionCompat?.setPlaybackState(playbackStateBuilder.build())
+        if (position != null) {
+            playbackStateBuilder.setState(playbackState, position, 0f)
+            mediaSessionCompat?.setPlaybackState(playbackStateBuilder.build())
+        }
     }
 
     fun updateNotification() {
@@ -390,17 +394,15 @@ class PlayerService: MediaBrowserServiceCompat() {
     }
 
     fun notifyNotification(notification: NotificationCompat.Builder) {
-        val buildNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(PLAYER_NOTIFICATION_CHANNEL_ID, PLAYER_NOTIFICATION_CHANNEL_NAME, NotificationManager.IMPORTANCE_LOW)
             notificationChannel.enableVibration(false)
             notificationChannel.enableLights(false)
             notificationManager?.createNotificationChannel(notificationChannel)
-            notification.setChannelId(PLAYER_NOTIFICATION_CHANNEL_ID).build()
         }
-        else
-            notification.build()
-        startForeground(PLAYER_NOTIFICATION_ID, buildNotification)
+        val buildNotification = notification.build()
         notificationManager?.notify(PLAYER_NOTIFICATION_ID, buildNotification)
+        startForeground(PLAYER_NOTIFICATION_ID, buildNotification)
     }
 
     fun isNotificationActivated(): Boolean {

@@ -36,6 +36,7 @@ class PlayerFragment: FrameFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        playerViewModel.mediaBrowserCompat.disconnect()
         playerViewModel.insertSettings()
     }
 
@@ -86,26 +87,6 @@ class PlayerFragment: FrameFragment() {
                 sharedViewModel.selectedTrack.postValue(it.track)
             }
         })
-        playerViewModel.panelState.observe(this, Observer {
-            it?.run {
-                fragmentPlayerBinding.mainLayout?.panelState = it
-            }
-        })
-        playerViewModel.playListOpened.observe(this, Observer {
-            it?.run {
-                if (!it) {
-                    playListLayout.animate().alpha(0f).setDuration(100)
-                            .withEndAction({playListLayout.visibility = View.GONE})
-                    fragmentPlayerBinding.mainLayout?.isTouchEnabled = true
-                }
-                else {
-                    fragmentPlayerBinding.mainLayout?.isTouchEnabled = false
-                    fragmentPlayerBinding.playListLayout!!.playlistRecyclerView.scrollToPosition(playerViewModel.currentTrack.value!!)
-                    playListLayout.animate().alpha(1f).setDuration(100)
-                            .withStartAction({playListLayout.visibility = View.VISIBLE})
-                }
-            }
-        })
         playerViewModel.songsLiveData.observe(this, Observer {
             it?.run {
                 trackViewPager.adapter = TrackPagerAdapter(it)
@@ -126,6 +107,26 @@ class PlayerFragment: FrameFragment() {
         playerViewModel.songLiveData.observe(this, Observer {
             it?.run {
                 playerViewModel.getLikedTrack(it)
+            }
+        })
+        playerViewModel.panelState.observe(this, Observer {
+            it?.run {
+                fragmentPlayerBinding.mainLayout?.panelState = it
+            }
+        })
+        playerViewModel.playListOpened.observe(this, Observer {
+            it?.run {
+                if (!it) {
+                    playListLayout.animate().alpha(0f).setDuration(100)
+                            .withEndAction({playListLayout.visibility = View.GONE})
+                    fragmentPlayerBinding.mainLayout?.isTouchEnabled = true
+                }
+                else {
+                    fragmentPlayerBinding.mainLayout?.isTouchEnabled = false
+                    fragmentPlayerBinding.playListLayout!!.playlistRecyclerView.scrollToPosition(playerViewModel.currentTrack.value!!)
+                    playListLayout.animate().alpha(1f).setDuration(100)
+                            .withStartAction({playListLayout.visibility = View.VISIBLE})
+                }
             }
         })
         playerViewModel.playModel.observe(this, Observer {

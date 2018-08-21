@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.view.ViewPager
@@ -162,9 +163,18 @@ class PlayerViewModel @Inject constructor(val application: Application,
 
     val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+        override fun onMetadataChanged(metadata: MediaMetadataCompat) {
+            super.onMetadataChanged(metadata)
+            if (metadata.description.mediaId!!.toInt() == songLiveData.value!!.songId) {
+                val bundle = Bundle()
+                bundle.putParcelable(TARGET_METADATA, metadata)
+                mediaControllerCompat!!.transportControls.sendCustomAction(UPDATE_METADATA, null)
+            }
+        }
+
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
             super.onPlaybackStateChanged(state)
-            when (state?.state) {
+            when (state.state) {
                 PlaybackStateCompat.STATE_CONNECTING ->
                     durationSeconds.postValue(state.position.toInt())
                 PlaybackStateCompat.STATE_PLAYING -> {
@@ -245,6 +255,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
                 mediaControllerCompat!!.transportControls.pause()
             }
             val bundle = Bundle()
+            bundle.putString(TARGET_ID, targetSong.songId.toString())
             bundle.putString(TARGET_TITLE, targetSong.title)
             bundle.putString(TARGET_ALBUM, targetSong.album)
             bundle.putString(TARGET_COVER_URL, targetSong.coverUrl)

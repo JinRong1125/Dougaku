@@ -2,11 +2,14 @@ package shinei.com.dougaku.helper
 
 const val PLAYER_ACTION = "shinei.com.dougaku.action."
 
+const val TARGET_ID = "TARGET_ID"
 const val TARGET_TITLE = "TARGET_TITLE"
 const val TARGET_ALBUM = "TARGET_ALBUM"
 const val TARGET_COVER_URL = "TARGET_COVER_URL"
 const val TARGET_STREAM_URL = "TARGET_STREAM_URL"
+const val TARGET_METADATA = "TARGET_METADATA"
 
+const val UPDATE_METADATA = PLAYER_ACTION + "UPDATE_METADATA"
 const val PLAY_PAUSE = PLAYER_ACTION + "PLAY_PAUSE"
 const val PREPARE_PAUSE = PLAYER_ACTION + "PREPARE_PAUSE"
 
