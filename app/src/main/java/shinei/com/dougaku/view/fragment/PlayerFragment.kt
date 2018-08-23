@@ -152,9 +152,6 @@ class PlayerFragment: FrameFragment() {
                     PlayMode.SHUFFLE_REPEAT -> {
                         playerViewModel.shuffleDrawable.postValue(Utils.getDrawable(activity!!, R.drawable.icon_shuffle_on))
                         playerViewModel.repeatDrawable.postValue(Utils.getDrawable(activity!!, R.drawable.icon_repeat_on))
-                        if (playerViewModel.songsLiveData.value!!.size > 1) {
-                            playerViewModel.setNextShuffleTrack()
-                        }
                     }
                 }
             }

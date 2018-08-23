@@ -529,8 +529,8 @@ class PlayerViewModel @Inject constructor(val application: Application,
                 seek(0)
             PlayMode.SHUFFLE_REPEAT -> {
                 if (songsLiveData.value!!.size > 1) {
-                    prepareTrack(shuffleTrack)
                     setNextShuffleTrack()
+                    prepareTrack(shuffleTrack)
                 }
                 else
                     seek(0)
