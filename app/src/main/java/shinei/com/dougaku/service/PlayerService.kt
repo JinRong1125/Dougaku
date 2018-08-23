@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.media.session.PlaybackState
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
@@ -58,6 +59,11 @@ class PlayerService: MediaBrowserServiceCompat() {
     override fun onCreate() {
         super.onCreate()
         initialService()
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent) {
+        super.onTaskRemoved(rootIntent)
+        stopSelf()
     }
 
     override fun onDestroy() {
@@ -128,21 +134,26 @@ class PlayerService: MediaBrowserServiceCompat() {
         override fun onTimelineChanged(timeline: Timeline, manifest: Any?, reason: Int) {}
 
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+            val mediaSessionState = mediaSessionCompat!!.controller.playbackState
             if (playWhenReady) {
-                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer!!.currentPosition)
-                updateNotification()
-                if (progressDisposable == null)
-                    progressDisposable = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
-                            .subscribe{
-                                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer?.currentPosition)
-                            }
+                if (mediaSessionState == null || mediaSessionState.state != PlaybackState.STATE_PLAYING) {
+                    setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer!!.currentPosition)
+                    updateNotification()
+                    if (progressDisposable == null)
+                        progressDisposable = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
+                                .subscribe{
+                                    setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer?.currentPosition)
+                                }
+                }
             }
             else {
-                progressDisposable?.dispose()
-                progressDisposable = null
-                setPlaybackState(PlaybackStateCompat.STATE_PAUSED, exoPlayer!!.currentPosition)
-                if (isNotificationActivated())
-                    updateNotification()
+                if (mediaSessionState == null || mediaSessionState.state != PlaybackState.STATE_PAUSED) {
+                    progressDisposable?.dispose()
+                    progressDisposable = null
+                    setPlaybackState(PlaybackStateCompat.STATE_PAUSED, exoPlayer!!.currentPosition)
+                    if (isNotificationActivated())
+                        updateNotification()
+                }
             }
             when (playbackState) {
                 Player.STATE_IDLE -> {
@@ -184,6 +195,7 @@ class PlayerService: MediaBrowserServiceCompat() {
         exoPlayer?.release()
         notificationManager?.cancel(PLAYER_NOTIFICATION_ID)
         stopForeground(true)
+        mediaSessionCompat?.isActive = false
         mediaSessionCompat?.release()
         progressDisposable?.dispose()
         connectivityManager?.unregisterNetworkCallback(networkCallback)
@@ -311,24 +323,6 @@ class PlayerService: MediaBrowserServiceCompat() {
         exoPlayer?.stop()
     }
 
-    fun createNotification(bundle: Bundle) {
-        Glide.with(this)
-                .asBitmap()
-                .load(bundle.getString(TARGET_COVER_URL))
-                .into(object : SimpleTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        val mediaMetadataCompat = MediaMetadataCompat.Builder()
-                        mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, resource)
-                        mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, resource)
-                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, bundle.getString(TARGET_ID))
-                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, bundle.getString(TARGET_TITLE))
-                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, bundle.getString(TARGET_ALBUM))
-                        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, bundle.getString(TARGET_STREAM_URL))
-                        mediaSessionCompat?.setMetadata(mediaMetadataCompat.build())
-                    }
-                })
-    }
-
     fun setPlaybackState(playbackState: Int, position: Long?) {
         val playbackStateBuilder = PlaybackStateCompat.Builder()
         playbackStateBuilder.setActions(
@@ -342,6 +336,38 @@ class PlayerService: MediaBrowserServiceCompat() {
             playbackStateBuilder.setState(playbackState, position, 0f)
             mediaSessionCompat?.setPlaybackState(playbackStateBuilder.build())
         }
+    }
+
+    fun createNotification(bundle: Bundle) {
+        val newCoverUrl = bundle.getString(TARGET_COVER_URL)
+        val metadata = mediaSessionCompat!!.controller.metadata
+        if (metadata != null) {
+            val description = metadata.description
+            if (newCoverUrl == description.iconUri.toString()) {
+                setMediaMetadata(bundle, description.iconBitmap!!)
+                return
+            }
+        }
+        Glide.with(this)
+                .asBitmap()
+                .load(newCoverUrl)
+                .into(object : SimpleTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        setMediaMetadata(bundle, resource)
+                    }
+                })
+    }
+
+    fun setMediaMetadata(bundle: Bundle, resource: Bitmap) {
+        val mediaMetadataCompat = MediaMetadataCompat.Builder()
+        mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, resource)
+        mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, resource)
+        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, bundle.getString(TARGET_ID))
+        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, bundle.getString(TARGET_TITLE))
+        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, bundle.getString(TARGET_ALBUM))
+        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, bundle.getString(TARGET_STREAM_URL))
+        mediaMetadataCompat.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, bundle.getString(TARGET_COVER_URL))
+        mediaSessionCompat?.setMetadata(mediaMetadataCompat.build())
     }
 
     fun updateNotification() {

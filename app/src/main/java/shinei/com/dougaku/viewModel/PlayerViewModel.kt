@@ -243,31 +243,36 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun delayLoadTrack(targetSong: Song) {
-        mediaControllerCompat!!.transportControls.stop()
-        disposable?.dispose()
-        disposable = Observable.timer(1000, TimeUnit.MILLISECONDS).subscribe({
-            if (!haveSettings) {
+        if (!haveSettings) {
+            mediaControllerCompat!!.transportControls.stop()
+            disposable?.dispose()
+            disposable = Observable.timer(1000, TimeUnit.MILLISECONDS).subscribe({
                 mediaControllerCompat!!.transportControls.play()
-            }
-            else {
-                haveSettings = false
-                playModel.postValue(settingsLiveData.value?.playMode)
-                mediaControllerCompat!!.transportControls.pause()
-            }
-            val bundle = Bundle()
-            bundle.putString(TARGET_ID, targetSong.songId.toString())
-            bundle.putString(TARGET_TITLE, targetSong.title)
-            bundle.putString(TARGET_ALBUM, targetSong.album)
-            bundle.putString(TARGET_COVER_URL, targetSong.coverUrl)
-            bundle.putString(TARGET_STREAM_URL, targetSong.streamUrl)
-            mediaControllerCompat!!.transportControls.playFromUri(Uri.parse(targetSong.streamUrl), bundle)
-            if (playModel.value == PlayMode.SHUFFLE && !isShuffling)
-                createShuffleList()
-            else
-                isShuffling = false
+                transportTrackData(targetSong)
+                getHistoryTrack(targetSong)
+            })
+        }
+        else {
+            haveSettings = false
+            mediaControllerCompat!!.transportControls.play()
+            mediaControllerCompat!!.transportControls.pause()
+            playModel.postValue(settingsLiveData.value?.playMode)
+            transportTrackData(targetSong)
+        }
+    }
 
-            getHistoryTrack(targetSong)
-        })
+    fun transportTrackData(targetSong: Song) {
+        val bundle = Bundle()
+        bundle.putString(TARGET_ID, targetSong.songId.toString())
+        bundle.putString(TARGET_TITLE, targetSong.title)
+        bundle.putString(TARGET_ALBUM, targetSong.album)
+        bundle.putString(TARGET_COVER_URL, targetSong.coverUrl)
+        bundle.putString(TARGET_STREAM_URL, targetSong.streamUrl)
+        mediaControllerCompat!!.transportControls.playFromUri(Uri.parse(targetSong.streamUrl), bundle)
+        if (playModel.value == PlayMode.SHUFFLE && !isShuffling)
+            createShuffleList()
+        else
+            isShuffling = false
     }
 
     fun getLikedTrack(song: Song) {
