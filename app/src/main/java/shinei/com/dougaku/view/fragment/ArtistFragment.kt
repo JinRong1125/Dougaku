@@ -34,16 +34,18 @@ class ArtistFragment: PageFragment() {
         fragmentArtistBinding.swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(context!!, R.color.green_dark))
 
         val sharedViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(SharedViewModel::class.java)
-        val artistAdapter = ArtistAdapter(emptyList(), artistPageModel, sharedViewModel)
+        val artistAdapter = ArtistAdapter(artistPageModel, sharedViewModel)
         fragmentArtistBinding.artistGridView.adapter = artistAdapter
 
         artistPageModel.artistsLiveData.observe(this, Observer {
             it?.run {
-                artistPageModel.refreshing.postValue(false)
-                artistAdapter.refresh(it)
+                artistAdapter.submitList(it)
             }
         })
-
-        artistPageModel.loadArtists()
+        artistPageModel.getAfterLoad().observe(this, Observer {
+            it?.run {
+                artistAdapter.setAfterLoad(it)
+            }
+        })
     }
 }

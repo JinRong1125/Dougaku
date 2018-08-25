@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ class PlayerFragment: FrameFragment() {
 
     lateinit var fragmentPlayerBinding: FragmentPlayerBinding
     lateinit var playerViewModel: PlayerViewModel
+    lateinit var sharedViewModel: SharedViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         fragmentPlayerBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false)
@@ -41,16 +43,17 @@ class PlayerFragment: FrameFragment() {
     }
 
     override fun onBackPressed(): Boolean {
-        return if (fragmentPlayerBinding.playListLayout!!.playListLayout.visibility == View.VISIBLE) {
-            playerViewModel.playListOpened.postValue(false)
-            true
+        return when {
+            fragmentPlayerBinding.playListLayout!!.playListLayout.visibility == View.VISIBLE -> {
+                playerViewModel.playListOpened.postValue(false)
+                true
+            }
+            sharedViewModel.panelState.value == SlidingUpPanelLayout.PanelState.EXPANDED -> {
+                playerViewModel.hide()
+                true
+            }
+            else -> false
         }
-        else if (fragmentPlayerBinding.mainLayout?.panelState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-            playerViewModel.hide()
-            true
-        }
-        else
-            false
     }
 
     override fun getBackPriority(): Int {
@@ -62,8 +65,30 @@ class PlayerFragment: FrameFragment() {
         trackViewPager.addOnPageChangeListener(playerViewModel.onPageChangeListener)
         val playListLayout = fragmentPlayerBinding.playListLayout!!.playListLayout
 
-        val sharedViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(SharedViewModel::class.java)
+        sharedViewModel = ViewModelProviders.of(activity!!, viewModelFactory).get(SharedViewModel::class.java)
         fragmentPlayerBinding.sharedViewModel = sharedViewModel
+        sharedViewModel.panelSlideOffset.observe(this, Observer {
+            it?.run {
+                when {
+                    it > 0.5f -> {
+                        playerViewModel.playerToolbarVisibility.postValue(View.VISIBLE)
+                        playerViewModel.bottomPlayerVisibility.postValue(View.GONE)
+                        playerViewModel.playerToolbarAlpha.postValue((it - 0.5f) * 2f)
+                    }
+                    it < 0.5f -> {
+                        playerViewModel.playerToolbarVisibility.postValue(View.GONE)
+                        playerViewModel.bottomPlayerVisibility.postValue(View.VISIBLE)
+                        playerViewModel.bottomPlayerAlpha.postValue((0.5f - it) * 2f)
+                    }
+                    else -> {
+                        playerViewModel.playerToolbarVisibility.postValue(View.GONE)
+                        playerViewModel.bottomPlayerVisibility.postValue(View.GONE)
+                        playerViewModel.playerToolbarAlpha.postValue(0f)
+                        playerViewModel.bottomPlayerAlpha.postValue(0f)
+                    }
+                }
+            }
+        })
         sharedViewModel.selectedSongs.observe(this, Observer {
             it?.run {
                 playerViewModel.songsLiveData.postValue(it)
@@ -73,7 +98,7 @@ class PlayerFragment: FrameFragment() {
             it?.run {
                 if (it) {
                     sharedViewModel.likedTracksUpdated.postValue(false)
-                    val panelState = playerViewModel.panelState.value
+                    val panelState = sharedViewModel.panelState.value
                     if (panelState == SlidingUpPanelLayout.PanelState.COLLAPSED ||
                             panelState == SlidingUpPanelLayout.PanelState.EXPANDED)
                         playerViewModel.getLikedTrack(playerViewModel.songLiveData.value!!)
@@ -109,9 +134,9 @@ class PlayerFragment: FrameFragment() {
                 playerViewModel.getLikedTrack(it)
             }
         })
-        playerViewModel.panelState.observe(this, Observer {
+        playerViewModel.collapsePlayer.observe(this, Observer {
             it?.run {
-                fragmentPlayerBinding.mainLayout?.panelState = it
+                sharedViewModel.collapsePlayer.postValue(it)
             }
         })
         playerViewModel.playListOpened.observe(this, Observer {
@@ -119,10 +144,10 @@ class PlayerFragment: FrameFragment() {
                 if (!it) {
                     playListLayout.animate().alpha(0f).setDuration(100)
                             .withEndAction({playListLayout.visibility = View.GONE})
-                    fragmentPlayerBinding.mainLayout?.isTouchEnabled = true
+                    sharedViewModel.isTouchEnabled.postValue(true)
                 }
                 else {
-                    fragmentPlayerBinding.mainLayout?.isTouchEnabled = false
+                    sharedViewModel.isTouchEnabled.postValue(false)
                     fragmentPlayerBinding.playListLayout!!.playlistRecyclerView.scrollToPosition(playerViewModel.currentTrack.value!!)
                     playListLayout.animate().alpha(1f).setDuration(100)
                             .withStartAction({playListLayout.visibility = View.VISIBLE})
@@ -174,12 +199,6 @@ class PlayerFragment: FrameFragment() {
                 }
             }
         })
-
-        fragmentPlayerBinding.root.post {
-            val mainLayout = (activity as MainActivity).findViewById(R.id.main_panel_layout) as ControlSlidingUpPanelLayout
-            mainLayout.addPanelSlideListener(playerViewModel.panelSlideListener)
-            fragmentPlayerBinding.mainLayout = mainLayout
-        }
 
         playerViewModel.initialService()
     }

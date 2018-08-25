@@ -11,11 +11,9 @@ import shinei.com.dougaku.api.DougakuRepository
 import shinei.com.dougaku.helper.RxSchedulersHelper
 import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.Album
-import shinei.com.dougaku.model.ProducerId
 import shinei.com.dougaku.room.LikedAlbumsDao
 import shinei.com.dougaku.view.activity.MainActivity
 import shinei.com.dougaku.view.fragment.AlbumDetailFragment
-import shinei.com.dougaku.view.fragment.ProducerDetailFragment
 import java.util.*
 import javax.inject.Inject
 

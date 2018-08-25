@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-//import com.squareup.leakcanary.LeakCanary
+import com.squareup.leakcanary.LeakCanary
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
 import shinei.com.dougaku.di.AppInjector
@@ -20,9 +20,9 @@ class App : Application(), HasActivityInjector {
 
     override fun onCreate() {
         super.onCreate()
-//        if (LeakCanary.isInAnalyzerProcess(this))
-//            return
-//        LeakCanary.install(this)
+        if (LeakCanary.isInAnalyzerProcess(this))
+            return
+        LeakCanary.install(this)
 
         AppInjector.init(this)
 

@@ -4,6 +4,7 @@ import io.reactivex.Observable
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
+import shinei.com.dougaku.api.parameter.*
 import shinei.com.dougaku.model.*
 
 interface DougakuService {
@@ -25,7 +26,7 @@ interface DougakuService {
     fun loadProducers(@Body body: ProducerId): Observable<List<Producer>>
 
     @POST("api/artists")
-    fun loadArtists(@Body body: RequestObject): Observable<List<Artist>>
+    fun loadArtists(@Body body: ArtistItem): Observable<List<Artist>>
 
     @POST("api/artists")
     fun loadArtists(@Body body: ArtistName): Observable<List<Artist>>

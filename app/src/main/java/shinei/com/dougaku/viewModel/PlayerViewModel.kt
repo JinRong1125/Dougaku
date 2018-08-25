@@ -16,7 +16,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
 import android.view.View
 import android.widget.SeekBar
-import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
@@ -24,8 +23,8 @@ import io.reactivex.disposables.Disposable
 import shinei.com.dougaku.R
 import shinei.com.dougaku.api.DougakuRepository
 import shinei.com.dougaku.helper.*
-import shinei.com.dougaku.model.AlbumId
-import shinei.com.dougaku.model.ArtistName
+import shinei.com.dougaku.api.parameter.AlbumId
+import shinei.com.dougaku.api.parameter.ArtistName
 import shinei.com.dougaku.model.Song
 import shinei.com.dougaku.room.*
 import shinei.com.dougaku.service.PlayerService
@@ -57,7 +56,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
     val currentTrack = MutableLiveData<Int>()
     val playModel = MutableLiveData<PlayMode>()
 
-    val panelState = MutableLiveData<SlidingUpPanelLayout.PanelState>()
+    val collapsePlayer = MutableLiveData<Boolean>()
     val playerToolbarAlpha = MutableLiveData<Float>()
     val bottomPlayerAlpha = MutableLiveData<Float>()
     val playerToolbarVisibility = MutableLiveData<Int>()
@@ -110,34 +109,6 @@ class PlayerViewModel @Inject constructor(val application: Application,
     override fun onCleared() {
         compositeDisposable.clear()
         super.onCleared()
-    }
-
-    val panelSlideListener = object : SlidingUpPanelLayout.PanelSlideListener {
-        override fun onPanelSlide(panel: View, slideOffset: Float) {
-            when {
-                slideOffset > 0.5f -> {
-                    playerToolbarVisibility.postValue(View.VISIBLE)
-                    bottomPlayerVisibility.postValue(View.GONE)
-                    playerToolbarAlpha.postValue((slideOffset - 0.5f) * 2f)
-                }
-                slideOffset < 0.5f -> {
-                    playerToolbarVisibility.postValue(View.GONE)
-                    bottomPlayerVisibility.postValue(View.VISIBLE)
-                    bottomPlayerAlpha.postValue((0.5f - slideOffset) * 2f)
-                }
-                else -> {
-                    playerToolbarVisibility.postValue(View.GONE)
-                    bottomPlayerVisibility.postValue(View.GONE)
-                    playerToolbarAlpha.postValue(0f)
-                    bottomPlayerAlpha.postValue(0f)
-                }
-            }
-        }
-
-        override fun onPanelStateChanged(panel: View, previousState: SlidingUpPanelLayout.PanelState, newState: SlidingUpPanelLayout.PanelState?) {
-            if (newState != SlidingUpPanelLayout.PanelState.DRAGGING)
-                panelState.postValue(newState)
-        }
     }
 
     val onPageChangeListener = object: ViewPager.OnPageChangeListener {
@@ -218,10 +189,12 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun insertSettings() {
-        compositeDisposable.add(Completable.fromAction {
-            settingsDao.insertSettings(Settings(0, playModel.value!!, songsLiveData.value!!, currentTrack.value!!)) }
-                .compose(RxSchedulersHelper.completableIoToMain())
-                .subscribe())
+        if (currentTrack.value != null) {
+            compositeDisposable.add(Completable.fromAction {
+                settingsDao.insertSettings(Settings(0, playModel.value!!, songsLiveData.value!!, currentTrack.value!!)) }
+                    .compose(RxSchedulersHelper.completableIoToMain())
+                    .subscribe())
+        }
     }
 
     fun prepareIsTrackRepeated(targetTrack: Int) {
@@ -253,9 +226,9 @@ class PlayerViewModel @Inject constructor(val application: Application,
             })
         }
         else {
-            haveSettings = false
             mediaControllerCompat!!.transportControls.play()
             mediaControllerCompat!!.transportControls.pause()
+            haveSettings = false
             playModel.postValue(settingsLiveData.value?.playMode)
             transportTrackData(targetSong)
         }
@@ -317,7 +290,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun hide() {
-        panelState.postValue(SlidingUpPanelLayout.PanelState.COLLAPSED)
+        collapsePlayer.postValue(true)
     }
 
     fun optionPopupMenu(view: View, sharedViewModel: SharedViewModel) {

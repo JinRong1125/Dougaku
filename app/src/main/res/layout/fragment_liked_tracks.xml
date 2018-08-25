@@ -35,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <android.support.v7.widget.RecyclerView
+                <shinei.com.dougaku.helper.ImageRecyclerView
                     android:id="@+id/liked_tracks_recycler_view"
                     android:layout_marginBottom="5dp"
                     android:layout_width="match_parent"

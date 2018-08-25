@@ -17,23 +17,19 @@
             android:id="@+id/swipe_refresh_layout"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:refreshing="@{artistPageModel.refreshing}"
-            app:onRefreshListener="@{() -> artistPageModel.loadArtists()}"
+            app:refreshing="@{artistPageModel.getInitialLoad}"
+            app:onRefreshListener="@{() -> artistPageModel.refresh()}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <android.support.v7.widget.RecyclerView
+            <shinei.com.dougaku.helper.ImageRecyclerView
                 android:id="@+id/artist_grid_view"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 app:layoutManager="android.support.v7.widget.GridLayoutManager"
-                app:spanCount="2"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:spanCount="2" />
 
         </android.support.v4.widget.SwipeRefreshLayout>
 

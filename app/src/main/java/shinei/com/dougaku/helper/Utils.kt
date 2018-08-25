@@ -27,6 +27,9 @@ import jp.wasabeef.glide.transformations.BlurTransformation
 import jp.wasabeef.glide.transformations.ColorFilterTransformation
 import shinei.com.dougaku.R
 import shinei.com.dougaku.api.DougakuRepository
+import shinei.com.dougaku.api.parameter.AlbumId
+import shinei.com.dougaku.api.parameter.ArtistName
+import shinei.com.dougaku.api.parameter.ProducerId
 import shinei.com.dougaku.model.*
 import shinei.com.dougaku.room.*
 import shinei.com.dougaku.view.activity.MainActivity

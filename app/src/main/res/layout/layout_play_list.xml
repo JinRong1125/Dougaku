@@ -30,7 +30,7 @@
             app:layout_constraintTop_toTopOf="parent"
             style="@style/image_button" />
 
-        <android.support.v7.widget.RecyclerView
+        <shinei.com.dougaku.helper.ImageRecyclerView
             android:id="@+id/playlist_recycler_view"
             android:layout_width="0dp"
             android:layout_height="0dp"

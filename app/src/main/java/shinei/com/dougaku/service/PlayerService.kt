@@ -23,6 +23,7 @@ import android.support.v4.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.text.TextUtils
+import android.util.Log
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
@@ -134,26 +135,21 @@ class PlayerService: MediaBrowserServiceCompat() {
         override fun onTimelineChanged(timeline: Timeline, manifest: Any?, reason: Int) {}
 
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-            val mediaSessionState = mediaSessionCompat!!.controller.playbackState
             if (playWhenReady) {
-                if (mediaSessionState == null || mediaSessionState.state != PlaybackState.STATE_PLAYING) {
-                    setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer!!.currentPosition)
-                    updateNotification()
-                    if (progressDisposable == null)
-                        progressDisposable = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
-                                .subscribe{
-                                    setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer?.currentPosition)
-                                }
-                }
+                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer!!.currentPosition)
+                updateNotification()
+                if (progressDisposable == null)
+                    progressDisposable = Observable.interval(0, 1000, TimeUnit.MILLISECONDS)
+                            .subscribe{
+                                setPlaybackState(PlaybackStateCompat.STATE_PLAYING, exoPlayer?.currentPosition)
+                            }
             }
             else {
-                if (mediaSessionState == null || mediaSessionState.state != PlaybackState.STATE_PAUSED) {
-                    progressDisposable?.dispose()
-                    progressDisposable = null
-                    setPlaybackState(PlaybackStateCompat.STATE_PAUSED, exoPlayer!!.currentPosition)
-                    if (isNotificationActivated())
-                        updateNotification()
-                }
+                progressDisposable?.dispose()
+                progressDisposable = null
+                setPlaybackState(PlaybackStateCompat.STATE_PAUSED, exoPlayer!!.currentPosition)
+                if (isNotificationActivated())
+                    updateNotification()
             }
             when (playbackState) {
                 Player.STATE_IDLE -> {
@@ -324,15 +320,15 @@ class PlayerService: MediaBrowserServiceCompat() {
     }
 
     fun setPlaybackState(playbackState: Int, position: Long?) {
-        val playbackStateBuilder = PlaybackStateCompat.Builder()
-        playbackStateBuilder.setActions(
-                PlaybackStateCompat.ACTION_PLAY_PAUSE or
-                        PlaybackStateCompat.ACTION_PLAY or
-                        PlaybackStateCompat.ACTION_PAUSE or
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
-
         if (position != null) {
+            val playbackStateBuilder = PlaybackStateCompat.Builder()
+            playbackStateBuilder.setActions(
+                    PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                            PlaybackStateCompat.ACTION_PLAY or
+                            PlaybackStateCompat.ACTION_PAUSE or
+                            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS or
+                            PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
+
             playbackStateBuilder.setState(playbackState, position, 0f)
             mediaSessionCompat?.setPlaybackState(playbackStateBuilder.build())
         }

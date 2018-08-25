@@ -11,9 +11,6 @@
         <variable
             name="sharedViewModel"
             type="shinei.com.dougaku.viewModel.SharedViewModel" />
-        <variable
-            name="mainLayout"
-            type="shinei.com.dougaku.helper.ControlSlidingUpPanelLayout" />
     </data>
 
     <android.support.constraint.ConstraintLayout

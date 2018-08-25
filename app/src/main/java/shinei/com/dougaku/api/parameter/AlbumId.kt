@@ -1,4 +1,4 @@
-package shinei.com.dougaku.model
+package shinei.com.dougaku.api.parameter
 
 import com.google.gson.annotations.SerializedName
 

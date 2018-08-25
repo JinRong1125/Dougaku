@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shinei.com.dougaku.helper.ControlSlidingUpPanelLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:sothree="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_panel_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="bottom"
-    sothree:umanoDragView="@+id/player_fragment"
-    sothree:umanoPanelHeight="60dp"
-    sothree:umanoInitialState="hidden">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <FrameLayout
-        android:id="@+id/main_container"
+    <data>
+        <variable
+            name="mainActivityModel"
+            type="shinei.com.dougaku.viewModel.MainActivityModel" />
+    </data>
+
+    <shinei.com.dougaku.helper.ControlSlidingUpPanelLayout
+        xmlns:sothree="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/main_panel_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        sothree:umanoDragView="@+id/player_fragment"
+        sothree:umanoPanelHeight="60dp"
+        sothree:umanoInitialState="hidden">
 
-    <fragment
-        android:id="@+id/player_fragment"
-        android:name="shinei.com.dougaku.view.fragment.PlayerFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <FrameLayout
+            android:id="@+id/main_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-</shinei.com.dougaku.helper.ControlSlidingUpPanelLayout>
+        <fragment
+            android:id="@+id/player_fragment"
+            android:name="shinei.com.dougaku.view.fragment.PlayerFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </shinei.com.dougaku.helper.ControlSlidingUpPanelLayout>
+</layout>
+

@@ -5,6 +5,7 @@ import io.reactivex.Observable
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import shinei.com.dougaku.R
+import shinei.com.dougaku.api.parameter.*
 import shinei.com.dougaku.helper.RxThreadCallAdapterFactory
 import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.*
@@ -33,8 +34,8 @@ class DougakuRepository {
         return dougakuService.loadProducers(producerId).retry(3)
     }
 
-    fun loadArtists(): Observable<List<Artist>> {
-        return dougakuService.loadArtists(RequestObject()).retry(3)
+    fun loadArtists(artistItem: ArtistItem): Observable<List<Artist>> {
+        return dougakuService.loadArtists(artistItem).retry(3)
     }
 
     fun loadArtists(artistName: ArtistName): Observable<List<Artist>> {

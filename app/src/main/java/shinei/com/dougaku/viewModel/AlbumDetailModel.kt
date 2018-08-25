@@ -3,9 +3,7 @@ package shinei.com.dougaku.viewModel
 import android.app.Application
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import android.content.DialogInterface
 import android.support.design.widget.AppBarLayout
-import android.support.v7.app.AlertDialog
 import android.support.v7.widget.PopupMenu
 import android.view.View
 import io.reactivex.Completable
@@ -15,13 +13,9 @@ import shinei.com.dougaku.api.DougakuRepository
 import shinei.com.dougaku.helper.RxSchedulersHelper
 import shinei.com.dougaku.helper.Utils
 import shinei.com.dougaku.model.Album
-import shinei.com.dougaku.model.ArtistName
-import shinei.com.dougaku.model.ProducerId
 import shinei.com.dougaku.model.Song
 import shinei.com.dougaku.room.*
 import shinei.com.dougaku.view.activity.MainActivity
-import shinei.com.dougaku.view.fragment.ArtistDetailFragment
-import shinei.com.dougaku.view.fragment.ProducerDetailFragment
 import javax.inject.Inject
 
 class AlbumDetailModel @Inject constructor(val application: Application,
