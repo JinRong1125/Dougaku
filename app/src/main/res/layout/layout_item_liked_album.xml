@@ -72,7 +72,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="@+id/album_image_view"/>
+            app:layout_constraintBottom_toBottomOf="@+id/album_image_view"
+            style="@style/button" />
 
         <Button
             android:layout_width="0dp"
@@ -82,7 +83,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/title_text_view"
             app:layout_constraintTop_toBottomOf="@+id/album_image_view"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/button" />
 
     </android.support.constraint.ConstraintLayout>
 

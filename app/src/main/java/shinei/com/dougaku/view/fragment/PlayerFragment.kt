@@ -108,6 +108,7 @@ class PlayerFragment: FrameFragment() {
         playerViewModel.settingsLiveData.observe(this, Observer {
             it?.run {
                 playerViewModel.haveSettings = true
+                playerViewModel.playLastSong = true
                 sharedViewModel.selectedSongs.postValue(it.songsList)
                 sharedViewModel.selectedTrack.postValue(it.track)
             }
@@ -164,7 +165,6 @@ class PlayerFragment: FrameFragment() {
                     PlayMode.SHUFFLE -> {
                         playerViewModel.shuffleDrawable.postValue(Utils.getDrawable(activity!!, R.drawable.icon_shuffle_on))
                         playerViewModel.repeatDrawable.postValue(Utils.getDrawable(activity!!, R.drawable.icon_repeat))
-                        playerViewModel.createShuffleList()
                     }
                     PlayMode.REPEAT -> {
                         playerViewModel.shuffleDrawable.postValue(Utils.getDrawable(activity!!, R.drawable.icon_shuffle))

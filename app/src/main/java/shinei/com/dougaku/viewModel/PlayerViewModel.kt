@@ -84,6 +84,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
     var previousTrack = 0
     var updateTrack = 0
     var haveSettings = false
+    var playLastSong = false
     var isUIUnUpdated = false
     var isSeeking = false
     var isShuffling = false
@@ -217,6 +218,8 @@ class PlayerViewModel @Inject constructor(val application: Application,
 
     fun delayLoadTrack(targetSong: Song) {
         if (!haveSettings) {
+            if (playLastSong)
+                playLastSong = false
             mediaControllerCompat!!.transportControls.stop()
             disposable?.dispose()
             disposable = Observable.timer(1000, TimeUnit.MILLISECONDS).subscribe({
@@ -226,11 +229,8 @@ class PlayerViewModel @Inject constructor(val application: Application,
             })
         }
         else {
-            mediaControllerCompat!!.transportControls.play()
-            mediaControllerCompat!!.transportControls.pause()
             haveSettings = false
             playModel.postValue(settingsLiveData.value?.playMode)
-            transportTrackData(targetSong)
         }
     }
 
@@ -242,10 +242,6 @@ class PlayerViewModel @Inject constructor(val application: Application,
         bundle.putString(TARGET_COVER_URL, targetSong.coverUrl)
         bundle.putString(TARGET_STREAM_URL, targetSong.streamUrl)
         mediaControllerCompat!!.transportControls.playFromUri(Uri.parse(targetSong.streamUrl), bundle)
-        if (playModel.value == PlayMode.SHUFFLE && !isShuffling)
-            createShuffleList()
-        else
-            isShuffling = false
     }
 
     fun getLikedTrack(song: Song) {
@@ -419,6 +415,10 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun playpause(){
+        if (playLastSong) {
+            playLastSong = false
+            transportTrackData(songsLiveData.value!![currentTrack.value!!])
+        }
         mediaControllerCompat!!.transportControls.sendCustomAction(PLAY_PAUSE, null)
     }
 
@@ -447,17 +447,15 @@ class PlayerViewModel @Inject constructor(val application: Application,
     }
 
     fun createShuffleList() {
-        firstTrack = currentTrack.value!!
-        if (songsLiveData.value!!.size > 1) {
-            val shuffleList = ArrayList<Int>()
-            for(i in 0 until songsLiveData.value!!.size) {
-                shuffleList.add(i)
-            }
-            shuffleList.remove(firstTrack)
-            shuffleList.shuffle()
-            this.shuffleList = shuffleList
-            currentShuffle = 0
+        val shuffleList = ArrayList<Int>()
+        for(i in 0 until songsLiveData.value!!.size) {
+            shuffleList.add(i)
         }
+        firstTrack = currentTrack.value!!
+        shuffleList.remove(firstTrack)
+        shuffleList.shuffle()
+        this.shuffleList = shuffleList
+        currentShuffle = 0
     }
 
     fun setNextShuffleTrack() {
@@ -479,12 +477,16 @@ class PlayerViewModel @Inject constructor(val application: Application,
                 }
             }
             PlayMode.SHUFFLE -> {
-                isShuffling = true
-                if (songsLiveData.value!!.size > 1 && currentShuffle < shuffleList.size) {
+                if (!isShuffling && songsLiveData.value!!.size > 1) {
+                    isShuffling = true
+                    createShuffleList()
+                }
+                if (isShuffling && currentShuffle < shuffleList.size) {
                     prepareTrack(shuffleList[currentShuffle])
                     currentShuffle += 1
                 }
                 else {
+                    isShuffling = false
                     preparePause()
                     prepareTrack(firstTrack)
                     currentShuffle = 0

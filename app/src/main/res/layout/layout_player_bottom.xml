@@ -79,7 +79,8 @@
             app:layout_constraintEnd_toStartOf="@+id/play_pause_image_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/button" />
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline_50"
