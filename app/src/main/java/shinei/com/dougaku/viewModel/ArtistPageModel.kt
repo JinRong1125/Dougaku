@@ -27,7 +27,7 @@ class ArtistPageModel @Inject constructor(val application: Application,
     var artistsLiveData: LiveData<PagedList<Artist>>
 
     init {
-        artistDataSourceFactory = ArtistDataSourceFactory(dougakuRepository, compositeDisposable)
+        artistDataSourceFactory = ArtistDataSourceFactory(application, dougakuRepository, compositeDisposable)
         artistsLiveData = loadArtists()
     }
 

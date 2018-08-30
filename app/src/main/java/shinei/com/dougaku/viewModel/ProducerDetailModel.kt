@@ -52,7 +52,7 @@ class ProducerDetailModel @Inject constructor(val application: Application,
     }
 
     fun loadProducerAlbums(producer: Producer) {
-        compositeDisposable.add(dougakuRepository.loadProducerAlbums(producer.producerId)
+        compositeDisposable.add(dougakuRepository.loadProducerAlbums(producer.producerId).retry(3)
                 .doOnSubscribe({ refreshing.postValue(true) })
                 .subscribe({ albumsLiveData.postValue(it) }, {
                     refreshing.postValue(false)

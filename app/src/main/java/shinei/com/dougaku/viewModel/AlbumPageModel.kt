@@ -29,7 +29,7 @@ class AlbumPageModel @Inject constructor(val application: Application,
     }
 
     fun loadAlbums() {
-        compositeDisposable.add(dougakuRepository.loadAlbums()
+        compositeDisposable.add(dougakuRepository.loadAlbums().retry(3)
                 .doOnSubscribe({ refreshing.postValue(true) })
                 .subscribe({
                     albumsLiveData.postValue(it)

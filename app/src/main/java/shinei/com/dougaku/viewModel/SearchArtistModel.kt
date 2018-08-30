@@ -32,7 +32,7 @@ class SearchArtistModel @Inject constructor(val application: Application,
     }
 
     fun searchArtists(keyword: String) {
-        compositeDisposable.add(dougakuRepository.searchArtists(keyword)
+        compositeDisposable.add(dougakuRepository.searchArtists(keyword).retry(3)
                 .doOnSubscribe({ refreshing.postValue(true) })
                 .subscribe({
                     artistsLiveData.postValue(it)

@@ -29,7 +29,7 @@ class ProducerPageModel @Inject constructor(val application: Application,
     }
 
     fun loadProducers() {
-        compositeDisposable.add(dougakuRepository.loadProducers()
+        compositeDisposable.add(dougakuRepository.loadProducers().retry(3)
                 .doOnSubscribe({ refreshing.postValue(true) })
                 .subscribe({ producersLiveData.postValue(it) }, {
                     refreshing.postValue(false)

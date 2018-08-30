@@ -364,7 +364,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
             hide()
         }
         else {
-            compositeDisposable.add(dougakuRepository.loadAlbums(AlbumId(albumId))
+            compositeDisposable.add(dougakuRepository.loadAlbums(AlbumId(albumId)).retry(3)
                     .doOnSubscribe({
                         progressBarLayoutVisibility.postValue(View.VISIBLE)
                     })
@@ -388,7 +388,7 @@ class PlayerViewModel @Inject constructor(val application: Application,
             hide()
         }
         else {
-            compositeDisposable.add(dougakuRepository.loadArtists(ArtistName(artistName))
+            compositeDisposable.add(dougakuRepository.loadArtists(ArtistName(artistName)).retry(3)
                     .doOnSubscribe({
                         progressBarLayoutVisibility.postValue(View.VISIBLE)
                     })

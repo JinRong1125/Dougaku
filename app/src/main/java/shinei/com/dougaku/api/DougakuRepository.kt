@@ -19,55 +19,55 @@ class DougakuRepository {
             .build().create(DougakuService::class.java)
 
     fun loadAlbums(): Observable<List<Album>> {
-        return dougakuService.loadAlbums(RequestObject()).retry(3)
+        return dougakuService.loadAlbums(RequestObject())
     }
 
     fun loadAlbums(albumId: AlbumId): Observable<List<Album>> {
-        return dougakuService.loadAlbums(albumId).retry(3)
+        return dougakuService.loadAlbums(albumId)
     }
 
     fun loadProducers(): Observable<List<Producer>> {
-        return dougakuService.loadProducers(RequestObject()).retry(3)
+        return dougakuService.loadProducers(RequestObject())
     }
 
     fun loadProducers(producerId: ProducerId): Observable<List<Producer>> {
-        return dougakuService.loadProducers(producerId).retry(3)
+        return dougakuService.loadProducers(producerId)
     }
 
     fun loadArtists(artistItem: ArtistItem): Observable<List<Artist>> {
-        return dougakuService.loadArtists(artistItem).retry(3)
+        return dougakuService.loadArtists(artistItem)
     }
 
     fun loadArtists(artistName: ArtistName): Observable<List<Artist>> {
-        return dougakuService.loadArtists(artistName).retry(3)
+        return dougakuService.loadArtists(artistName)
     }
 
     fun loadAlbumSongs(albumId: Int): Observable<List<Song>> {
-        return dougakuService.loadAlbumSongs(AlbumId(albumId)).retry(3)
+        return dougakuService.loadAlbumSongs(AlbumId(albumId))
     }
 
     fun loadArtistSongsAlbums(artistId: Int): Observable<SongAlbum> {
-        return dougakuService.loadArtistSongsAlbums(ArtistId(artistId)).retry(3)
+        return dougakuService.loadArtistSongsAlbums(ArtistId(artistId))
     }
 
     fun loadProducerAlbums(producerId: Int): Observable<List<Album>> {
-        return dougakuService.loadProducerAlbums(ProducerId(producerId)).retry(3)
+        return dougakuService.loadProducerAlbums(ProducerId(producerId))
     }
 
     fun searchSongs(keyword: String): Observable<List<Song>> {
-        return dougakuService.searchSongs(Keyword(keyword)).retry(3)
+        return dougakuService.searchSongs(Keyword(keyword))
     }
 
     fun searchAlbums(keyword: String): Observable<List<Album>> {
-        return dougakuService.searchAlbums(Keyword(keyword)).retry(3)
+        return dougakuService.searchAlbums(Keyword(keyword))
     }
 
     fun searchArtists(keyword: String): Observable<List<Artist>> {
-        return dougakuService.searchArtists(Keyword(keyword)).retry(3)
+        return dougakuService.searchArtists(Keyword(keyword))
     }
 
     fun searchProducers(keyword: String): Observable<List<Producer>> {
-        return dougakuService.searchProducers(Keyword(keyword)).retry(3)
+        return dougakuService.searchProducers(Keyword(keyword))
     }
 
     fun showError(context: Context) {

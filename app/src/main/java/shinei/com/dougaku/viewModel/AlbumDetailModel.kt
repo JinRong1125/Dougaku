@@ -71,7 +71,7 @@ class AlbumDetailModel @Inject constructor(val application: Application,
     }
 
     fun loadAlbumSongs(album: Album) {
-        compositeDisposable.add(dougakuRepository.loadAlbumSongs(album.albumId)
+        compositeDisposable.add(dougakuRepository.loadAlbumSongs(album.albumId).retry(3)
                 .doOnSubscribe{ refreshing.postValue(true) }
                 .subscribe({
                     songsLiveData.postValue(it)

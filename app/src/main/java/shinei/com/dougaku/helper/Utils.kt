@@ -171,7 +171,7 @@ object Utils{
         if (selectedAlbumValue != null && selectedAlbumValue.albumId == albumId)
             Utils.addFrameFragment(view, AlbumDetailFragment())
         else {
-            compositeDisposable.add(dougakuRepository.loadAlbums(AlbumId(albumId))
+            compositeDisposable.add(dougakuRepository.loadAlbums(AlbumId(albumId)).retry(3)
                     .doOnSubscribe({
                         refreshing.postValue(true)
                     })
@@ -191,7 +191,7 @@ object Utils{
         if (selectedArtistValue != null && selectedArtistValue.name == artistName)
             Utils.addFrameFragment(view, ArtistDetailFragment())
         else {
-            compositeDisposable.add(dougakuRepository.loadArtists(ArtistName(artistName))
+            compositeDisposable.add(dougakuRepository.loadArtists(ArtistName(artistName)).retry(3)
                     .doOnSubscribe({
                         refreshing.postValue(true)
                     })
@@ -211,7 +211,7 @@ object Utils{
         if (selectedProducerValue != null && selectedProducerValue.producerId == producerId)
             Utils.addFrameFragment(view, ProducerDetailFragment())
         else {
-            compositeDisposable.add(dougakuRepository.loadProducers(ProducerId(producerId))
+            compositeDisposable.add(dougakuRepository.loadProducers(ProducerId(producerId)).retry(3)
                     .doOnSubscribe({
                         refreshing.postValue(true)
                     })

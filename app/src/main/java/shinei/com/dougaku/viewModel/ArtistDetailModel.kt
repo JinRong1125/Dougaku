@@ -62,7 +62,7 @@ class ArtistDetailModel @Inject constructor(val application: Application,
     }
 
     fun loadArtistSongsAlbums(artist: Artist) {
-        compositeDisposable.add(dougakuRepository.loadArtistSongsAlbums(artist.artistId)
+        compositeDisposable.add(dougakuRepository.loadArtistSongsAlbums(artist.artistId).retry(3)
                 .doOnSubscribe{ refreshing.postValue(true) }
                 .subscribe({
                     albumsLiveData.postValue(it.albumsList)

@@ -32,7 +32,7 @@ class SearchProducerModel @Inject constructor(val application: Application,
     }
 
     fun searchProducers(keyword: String) {
-        compositeDisposable.add(dougakuRepository.searchProducers(keyword)
+        compositeDisposable.add(dougakuRepository.searchProducers(keyword).retry(3)
                 .doOnSubscribe({ refreshing.postValue(true) })
                 .subscribe({
                     producersLiveData.postValue(it)
