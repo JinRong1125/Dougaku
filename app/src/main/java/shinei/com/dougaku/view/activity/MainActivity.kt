@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
     @Inject lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
     lateinit var activityMainBinding: ActivityMainBinding
+
     lateinit var mainActivityModel: MainActivityModel
 
     override fun supportFragmentInjector() = dispatchingAndroidInjector
