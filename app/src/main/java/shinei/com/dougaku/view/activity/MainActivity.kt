@@ -21,6 +21,7 @@ import shinei.com.dougaku.viewModel.SharedViewModel
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
+    // fourth
 
     @Inject lateinit var viewModelFactory: ViewModelProvider.Factory
     @Inject lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
