@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity(), HasSupportFragmentInjector {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // nine
+        // tenth
         activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         activityMainBinding.setLifecycleOwner(this)
         mainActivityModel = ViewModelProviders.of(this, viewModelFactory).get(MainActivityModel::class.java)
